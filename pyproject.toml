@@ -1,0 +1,55 @@
+[tool.poetry]
+name          = "pbvs25_tp-mot"
+version       = "0.0.1"
+description   = "Deep learning model."
+license       = "MIT"
+authors       = [
+    "Duong Nguyen-Ngoc Tran <duongtran.k10@gmail.com>",
+]
+maintainers   = [
+    "Duong Nguyen-Ngoc Tran <duongtran.k10@gmail.com>",
+]
+readme        = "README.md"
+keywords      = [
+    "computer vision",
+    "image processing",
+    "deep learning",
+    "research",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+]
+packages = [
+    {include = "thermal_pedestrian"  , from = "."},
+]
+include = [
+    "LICENSE",
+    "pyproject.toml",
+]
+exclude = []
+
+[tool.poetry.dependencies]
+python    = ">=3.10, <3.13"
+
+
+[tool.poetry.extras]
+dev = [
+#    "argoverse"
+#    "av2"
+]
+
+[build-system]
+requires      = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+# Comments
+#
+# 1. Fix thop error: AttributeError: 'some_object' object has no attribute 'total_ops'
+# pip install --upgrade git+https://github.com/sile/pytorch-OpCounter.git@8f115d4aeaee787d7347b75f30be28164b02ccaa
