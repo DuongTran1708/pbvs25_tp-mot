@@ -324,7 +324,7 @@ def main():
 
 	# convert_all_format_coco_to_mot()
 
-	copy_yolo_dataset_for_training()
+	# copy_yolo_dataset_for_training()
 	pass
 
 

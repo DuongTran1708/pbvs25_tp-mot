@@ -9,6 +9,8 @@ set -e
 # Install the required packages.
 pip install poetry==1.2.0
 pip install pylabel==0.1.55
+pip install pycocotools==2.0.8
+pip install easydict==1.13
 
 # In stall the project in editable mode.
 rm -rf poetry.lock
