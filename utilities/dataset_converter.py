@@ -4,6 +4,7 @@ import glob
 
 import json
 import random
+import shutil
 
 import pandas as pd
 import numpy as np
@@ -275,9 +276,55 @@ def convert_all_format_coco_to_mot():
 		convert_coco_to_mot(seq, path_file_in, path_file_ou, path_dir_img)
 
 
+def copy_yolo_dataset_for_training():
+	# Init file
+	path_folder_lbl_in  = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/annotations/train/"
+	path_folder_img_in  = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/images/train/"
+	path_folder_yolo_ou = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/yolo_format/"
+
+	# create folder
+	path_folder_lbl_yolo_ou = os.path.join(path_folder_yolo_ou, "train/labels")
+	path_folder_img_yolo_ou = os.path.join(path_folder_yolo_ou, "train/images")
+	os.makedirs(path_folder_lbl_yolo_ou, exist_ok=True)
+	os.makedirs(path_folder_img_yolo_ou, exist_ok=True)
+
+	# get list folder
+	list_seqs = os.listdir(path_folder_lbl_in)
+
+	# loop to export dataset
+	for seq in tqdm(list_seqs):
+		# get path file
+		path_dir_lbl_in = os.path.join(path_folder_lbl_in, seq, 'thermal/yolo')
+		path_dir_img_in = os.path.join(path_folder_img_in, seq, 'thermal')
+
+		# get list file
+		list_files = os.listdir(path_dir_lbl_in)
+
+		# loop to export dataset
+		for file in list_files:
+			# get path file
+			path_file_lbl_in = os.path.join(path_dir_lbl_in, file)
+			path_file_img_in = os.path.join(path_dir_img_in, file.replace('.txt', '.png'))
+
+			# check file exist
+			if not exists(path_file_img_in):
+				continue
+
+			# get path file out
+			path_file_lbl_ou = os.path.join(path_folder_lbl_yolo_ou, file)
+			path_file_img_ou = os.path.join(path_folder_img_yolo_ou, file.replace('.txt', '.png'))
+
+			# copy file
+			shutil.copyfile(path_file_lbl_in, path_file_lbl_ou)
+			shutil.copyfile(path_file_img_in, path_file_img_ou)
+
+
 def main():
 	# convert_all_folder_coco_to_yolo()
-	convert_all_format_coco_to_mot()
+
+	# convert_all_format_coco_to_mot()
+
+	copy_yolo_dataset_for_training()
 	pass
 
 

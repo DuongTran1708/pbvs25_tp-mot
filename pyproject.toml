@@ -26,7 +26,8 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
 ]
 packages = [
-    {include = "thermal_pedestrian"  , from = "."},
+    {include = "thermal_pedestrian" , from = "."},
+    {include = "trackeval"          , from = "third_party"},
 ]
 include = [
     "LICENSE",
