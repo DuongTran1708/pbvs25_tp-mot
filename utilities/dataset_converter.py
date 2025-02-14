@@ -41,6 +41,7 @@ schema = [
 	"ann_segmentation",
 	"ann_iscrowd",
 	"ann_track_id",  # SUGAR: add track id in schema so the dataset does not drop it in format
+	"ann_score",    # SUGAR: add score for detection in schema so the dataset does not drop it in format
 	"ann_keypoints",
 	"ann_pose",
 	"ann_truncated",
@@ -50,6 +51,10 @@ schema = [
 	"cat_supercategory",
 	"split",
 	"annotated",
+]
+
+classes = [
+	"person"
 ]
 
 # get from pylabel
@@ -173,9 +178,6 @@ def convert_all_folder_coco_to_yolo():
 	# Init file
 	path_folder_lbl_in = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/annotations/train/"
 	path_folder_img_in = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/images/train/"
-	classes = [
-		"person"
-	]
 
 	# get list folder
 	list_seqs = os.listdir(path_folder_lbl_in)
