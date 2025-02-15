@@ -1,4 +1,5 @@
 import json
+import math
 import os
 import copy
 import random
@@ -289,10 +290,13 @@ def ExportToCoco_PBVS(dataset, output_path=None, cat_id_index=None):
 
 		# Skip this if cat_id is na
 		if not pd.isna(df["cat_id"][i]):
+			# print(df["ann_score"][i])
+			# sys.exit()
+
 			annotations = [
 				{
-					"image_id": df["img_id"][i],
 					"id": df.index[i],
+					"image_id": df["img_id"][i],
 					"segmented": df["ann_segmented"][i],
 					"bbox": [
 						df["ann_bbox_xmin"][i],
@@ -303,8 +307,7 @@ def ExportToCoco_PBVS(dataset, output_path=None, cat_id_index=None):
 					"area": df["ann_area"][i],
 					"segmentation": df["ann_segmentation"][i],
 					"iscrowd": df["ann_iscrowd"][i],
-					# "score": df["ann_score"][i],
-					"score": float(random.randint(60, 90) / 100),
+					"score": df["ann_score"][i] if not math.isnan(df["ann_score"][i]) else float(random.randint(60, 90) / 100),
 					"pose": df["ann_pose"][i],
 					"truncated": df["ann_truncated"][i],
 					"category_id": int(df["cat_id"][i]),
@@ -410,7 +413,7 @@ def convert_yolo_result_to_coco_result(folder_img, folder_yolo, file_re):
 		path           = folder_yolo,
 		path_to_images = folder_img,
 		cat_names      = yoloclasses,
-		name           = "coco128"
+		name           = "pbvs_dataset"
 	)
 
 	print(f"Info: {dataset.df.info()}")
@@ -418,6 +421,29 @@ def convert_yolo_result_to_coco_result(folder_img, folder_yolo, file_re):
 	print(f"Number of classes: {dataset.analyze.num_classes}")
 	print(f"Classes:{dataset.analyze.classes}")
 	print(f"Class counts:\n{dataset.analyze.class_counts}")
+
+	# DEBUG:
+	count = 0
+	name  = ""
+	set_file_name = set()
+	for index in tqdm(dataset.df.index, desc=f""):
+		# get row
+		set_file_name.add((os.path.splitext(dataset.df.iloc[index]["img_filename"])[0], dataset.df.iloc[index]["img_id"]))
+
+	list_file_name = np.array(list(set_file_name))
+	list_file_name = sorted(list_file_name, key=lambda x: int(x[0]))
+	for item in list_file_name:
+		print(item[0], " ", item[1])
+	# print(set_file_name)
+	sys.exit()
+
+	dataset.export.ExportToYoloV5(
+		output_path   = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/yolo_format_test/labels/",
+		copy_images = True,
+		cat_id_index = 0  # 0: cat_id
+	)[0]
+
+
 
 	# SUGAR: export to COCO, image_id, object_id must start from 1, PBVS rule
 	print(ExportToCoco_PBVS(
@@ -432,9 +458,6 @@ def convert_yolo_result_to_coco_result(folder_img, folder_yolo, file_re):
 	with open(file_re) as f_in:
 		anns = json.load(f_in)
 	anns = anns["annotations"]
-
-	# SUGAR:
-	# sys.exit()
 
 	# SUGAR: add 1 into image_id, object_id, image_id, object_id must start from 1, PBVS rule
 	for ann in anns:
@@ -469,7 +492,7 @@ def evaliation_coco_result(annFile, resFile):
 			json.dump(anns, f_ou)
 
 		# load again
-		cocoDt  = cocoGt.loadRes(resFile)
+		# cocoDt  = cocoGt.loadRes(resFile)
 
 	imgIds = sorted(cocoGt.getImgIds())
 	imgIds = imgIds[0 : 100]
@@ -494,6 +517,19 @@ def evaluate_detection():
 	# file_re     = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/seq2_od_result_example.json"
 	evaliation_coco_result(file_gt, file_re)
 
+def check_json():
+	with open("/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/seq2_od_result_example.json") as f_in:
+		anns_origin = json.load(f_in)
+	with open("/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/seq2_od_result_example.txt", "w") as f_write:
+		for ann in anns_origin:
+			f_write.write(f"{ann['image_id']} {ann['id']}\n")
+
+
+	with open("/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/seq2_od_result_conversion.json") as f_in:
+		anns_conver = json.load(f_in)
+	with open("/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/seq2_od_result_conversion.txt", "w") as f_write:
+		for ann in anns_conver:
+			f_write.write(f"{ann['image_id']} {ann['id']}\n")
 
 if __name__ == '__main__':
 	# parser = argparse.ArgumentParser(description='MTMC Evaluation')
@@ -501,4 +537,7 @@ if __name__ == '__main__':
 	# parser.add_argument('--gt', help='Ground-truth annotation', type=str)
 	# parser.add_argument('--ou', help='Evaluation result', type=str)
 	# args = parser.parse_args()
+
 	evaluate_detection()
+
+	check_json()
