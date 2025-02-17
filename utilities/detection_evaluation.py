@@ -1,3 +1,4 @@
+import glob
 import json
 import math
 import os
@@ -30,6 +31,7 @@ schema = [
 	"img_width",
 	"img_height",
 	"img_depth",
+	"ann_id", # SUGAR: add id in schema so the dataset does not drop it in format
 	"ann_segmented",
 	"ann_bbox_xmin",
 	"ann_bbox_ymin",
@@ -52,6 +54,7 @@ schema = [
 	"split",
 	"annotated",
 ]
+
 
 classes = [
 	"person"
@@ -111,9 +114,12 @@ def ImportYoloV5_PBVS(
 
 	# iterate over files in that directory
 	pbar = tqdm(desc="Importing YOLO files...", total=len(os.listdir(path)))
-	for filename in os.scandir(path):
-		if filename.is_file() and filename.name.endswith(".txt"):
-			filepath = filename.path
+
+	for filename in sorted(glob.glob(os.path.join(path, "*.txt"))):
+	# for filename in os.scandir(path):
+
+		if os.path.isfile(filename) and os.path.basename(filename).endswith(".txt"):
+			filepath = filename
 			file = open(filepath, "r", encoding=encoding)  # Read file
 			row = {}
 
@@ -124,7 +130,7 @@ def ImportYoloV5_PBVS(
 			# by looping through the extension in the img_ext parameter
 			found_image = False
 			for ext in img_ext.split(","):
-				image_filename = filename.name.replace("txt", ext)
+				image_filename = os.path.basename(filename).replace("txt", ext)
 
 				# Get the path to the image file to extract the height, width, and depth
 				image_path = PurePath(path, path_to_images, image_filename)
@@ -233,7 +239,11 @@ def ImportYoloV5_PBVS(
 	return dataset
 
 
-def ExportToCoco_PBVS(dataset, output_path=None, cat_id_index=None):
+def ExportToCoco_PBVS(
+		dataset,
+		output_path  = None,
+		cat_id_index = None
+):
 	"""
 	Writes COCO annotation files to disk (in JSON format) and returns the path to files.
 
@@ -276,18 +286,23 @@ def ExportToCoco_PBVS(dataset, output_path=None, cat_id_index=None):
 
 	pbar = tqdm(desc="Exporting to COCO file...", total=df.shape[0])
 	for i in range(0, df.shape[0]):
+		# DEBUG:
+		# print(df["img_id"][i], " ", int(df["ann_id"][i]) if not np.isnan(df["ann_id"][i]) else df.index[i], " ", df["img_filename"][i])
+
 		images = [
 			{
-				"id": df["img_id"][i],
-				"folder": df["img_folder"][i],
+				"id"       : df["img_id"][i],
+				"folder"   : df["img_folder"][i],
 				"file_name": df["img_filename"][i],
-				"path": df["img_path"][i],
-				"width": df["img_width"][i],
-				"height": df["img_height"][i],
-				"depth": df["img_depth"][i],
+				# "path"     : df["img_path"][i],
+				"width"    : df["img_width"][i],
+				"height"   : df["img_height"][i],
+				# "depth"    : df["img_depth"][i],
 			}
 		]
 
+		# SUGAR:
+		# annotations = None
 		# Skip this if cat_id is na
 		if not pd.isna(df["cat_id"][i]):
 			# print(df["ann_score"][i])
@@ -295,8 +310,8 @@ def ExportToCoco_PBVS(dataset, output_path=None, cat_id_index=None):
 
 			annotations = [
 				{
-					"id": df.index[i],
-					"image_id": df["img_id"][i],
+					"id"       : int(df["ann_id"][i]) if not np.isnan(df["ann_id"][i]) else df.index[i],
+					"image_id" : df["img_id"][i],
 					"segmented": df["ann_segmented"][i],
 					"bbox": [
 						df["ann_bbox_xmin"][i],
@@ -304,14 +319,14 @@ def ExportToCoco_PBVS(dataset, output_path=None, cat_id_index=None):
 						df["ann_bbox_width"][i],
 						df["ann_bbox_height"][i],
 					],
-					"area": df["ann_area"][i],
+					"area"        : df["ann_area"][i],
 					"segmentation": df["ann_segmentation"][i],
-					"iscrowd": df["ann_iscrowd"][i],
-					"score": df["ann_score"][i] if not math.isnan(df["ann_score"][i]) else float(random.randint(60, 90) / 100),
-					"pose": df["ann_pose"][i],
-					"truncated": df["ann_truncated"][i],
-					"category_id": int(df["cat_id"][i]),
-					"difficult": df["ann_difficult"][i],
+					"iscrowd"     : df["ann_iscrowd"][i],
+					"score"       : df["ann_score"][i] if not np.isnan(df["ann_score"][i]) else float(random.randint(60, 90) / 100),
+					"pose"        : df["ann_pose"][i],
+					"truncated"   : df["ann_truncated"][i],
+					"category_id" : int(df["cat_id"][i]),
+					"difficult"   : df["ann_difficult"][i],
 				}
 			]
 
@@ -405,6 +420,7 @@ def ExportToCoco_PBVS(dataset, output_path=None, cat_id_index=None):
 
 	with open(output_path, "w") as outfile:
 		json.dump(obj=json_output, fp=outfile, indent=4)
+
 	return [str(output_path)]
 
 def convert_yolo_result_to_coco_result(folder_img, folder_yolo, file_re):
@@ -423,25 +439,26 @@ def convert_yolo_result_to_coco_result(folder_img, folder_yolo, file_re):
 	print(f"Class counts:\n{dataset.analyze.class_counts}")
 
 	# DEBUG:
-	count = 0
-	name  = ""
-	set_file_name = set()
-	for index in tqdm(dataset.df.index, desc=f""):
-		# get row
-		set_file_name.add((os.path.splitext(dataset.df.iloc[index]["img_filename"])[0], dataset.df.iloc[index]["img_id"]))
+	# count = 0
+	# name  = ""
+	# set_file_name = set()
+	# for index in tqdm(dataset.df.index, desc=f""):
+	# 	# get row
+	# 	set_file_name.add((os.path.splitext(dataset.df.iloc[index]["img_filename"])[0], dataset.df.iloc[index]["img_id"]))
+	#
+	# list_file_name = np.array(list(set_file_name))
+	# list_file_name = sorted(list_file_name, key=lambda x: int(x[0]))
+	# for item in list_file_name:
+	# 	print(item[0], " ", item[1])
+	# # print(set_file_name)
+	# sys.exit()
 
-	list_file_name = np.array(list(set_file_name))
-	list_file_name = sorted(list_file_name, key=lambda x: int(x[0]))
-	for item in list_file_name:
-		print(item[0], " ", item[1])
-	# print(set_file_name)
-	sys.exit()
-
-	dataset.export.ExportToYoloV5(
-		output_path   = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/yolo_format_test/labels/",
-		copy_images = True,
-		cat_id_index = 0  # 0: cat_id
-	)[0]
+	# DEBUG:
+	# dataset.export.ExportToYoloV5(
+	# 	output_path   = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/yolo_format_test/labels/",
+	# 	copy_images = True,
+	# 	cat_id_index = 0  # 0: cat_id
+	# )[0]
 
 
 
@@ -474,11 +491,11 @@ def evaliation_coco_result(annFile, resFile):
 	print('Running demo for *%s* results.'%(annType))
 
 	#initialize COCO ground truth api
-	# annFile = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/annotations/val/seq2/thermal/COCO/annotations.json"
+	# annFile = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/seq2/thermal/COCO/annotations.json"
 	cocoGt  = COCO(annFile)
 
 	#initialize COCO detections api
-	# resFile = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/seq2_od_result_example.json"
+	# resFile = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/seq2_od_result_example.json"
 	try:
 		cocoDt  = cocoGt.loadRes(resFile)
 	except AssertionError:
@@ -492,7 +509,7 @@ def evaliation_coco_result(annFile, resFile):
 			json.dump(anns, f_ou)
 
 		# load again
-		# cocoDt  = cocoGt.loadRes(resFile)
+		cocoDt  = cocoGt.loadRes(resFile)
 
 	imgIds = sorted(cocoGt.getImgIds())
 	imgIds = imgIds[0 : 100]
@@ -503,31 +520,48 @@ def evaliation_coco_result(annFile, resFile):
 	cocoEval.evaluate()
 	cocoEval.accumulate()
 	cocoEval.summarize()
+	return str(cocoEval.stats)
 
 
 def evaluate_detection():
 	# Init file
-	file_gt     = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/annotations/val/seq2/thermal/COCO/annotations.json"
-	file_re     = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/seq2_od_result_conversion.json"
-	folder_yolo = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/annotations/val/seq2/thermal/yolo"
-	folder_img  = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/images/val/seq2/thermal/"
+	folder_lbl_in = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/"
+	folder_img_in = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/images/val/"
+	# goundtruth
+	file_gt       = f"{folder_lbl_in}seq2/thermal/COCO/annotations.json"
+	# yolo result
+	folder_yolo   = f"{folder_lbl_in}seq2/thermal/yolo"
+	folder_img    = f"{folder_img_in}seq2/thermal/"
+	# evaluation result
+	folder_out_temp = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/"
+	file_result_ou  = f"{folder_out_temp}object_detection_result.txt"
 
-	convert_yolo_result_to_coco_result(folder_img, folder_yolo, file_re)
+	# get list folder
+	list_seqs = sorted(os.listdir(folder_lbl_in))
 
-	# file_re     = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/seq2_od_result_example.json"
-	evaliation_coco_result(file_gt, file_re)
+	# loop to export dataset
+	with open(file_result_ou, "w") as f_ou:
+		for seq in tqdm(list_seqs):
+			# output conversion from yolo to coco
+			file_re       = f"{folder_out_temp}{seq}_od_result_conversion.json"
+
+			convert_yolo_result_to_coco_result(folder_img, folder_yolo, file_re)
+
+			# file_re     = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/seq2_od_result_example.json"
+			f_ou.write(f"Detection evaluation for {seq}:\n")
+			f_ou.write(f"{evaliation_coco_result(file_gt, file_re)}\n\n")
 
 def check_json():
-	with open("/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/seq2_od_result_example.json") as f_in:
+	with open("/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/seq2_od_result_example.json") as f_in:
 		anns_origin = json.load(f_in)
-	with open("/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/seq2_od_result_example.txt", "w") as f_write:
+	with open("/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/seq2_od_result_example.txt", "w") as f_write:
 		for ann in anns_origin:
 			f_write.write(f"{ann['image_id']} {ann['id']}\n")
 
 
-	with open("/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/seq2_od_result_conversion.json") as f_in:
+	with open("/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/seq2_od_result_conversion.json") as f_in:
 		anns_conver = json.load(f_in)
-	with open("/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/seq2_od_result_conversion.txt", "w") as f_write:
+	with open("/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/seq2_od_result_conversion.txt", "w") as f_write:
 		for ann in anns_conver:
 			f_write.write(f"{ann['image_id']} {ann['id']}\n")
 
@@ -540,4 +574,4 @@ if __name__ == '__main__':
 
 	evaluate_detection()
 
-	check_json()
+	# check_json()

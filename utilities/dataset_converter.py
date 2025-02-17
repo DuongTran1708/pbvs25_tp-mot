@@ -30,6 +30,7 @@ schema = [
 	"img_width",
 	"img_height",
 	"img_depth",
+	"ann_id", # SUGAR: add id in schema so the dataset does not drop it in format
 	"ann_segmented",
 	"ann_bbox_xmin",
 	"ann_bbox_ymin",
@@ -101,6 +102,10 @@ def ImportCoco_PBVS(path, path_to_images=None, name=None, encoding="utf-8"):
 			astype_dict.pop(element)
 	# print(astype_dict)
 	# images = images.astype({'img_width': 'int64','img_height': 'int64','img_depth': 'int64'})
+
+	# DEBUG:
+	# print(images)
+
 	images = images.astype(astype_dict)
 
 	annotations = pd.json_normalize(annotations_json["annotations"])
@@ -124,6 +129,9 @@ def ImportCoco_PBVS(path, path_to_images=None, name=None, encoding="utf-8"):
 	df.insert(10, "ann_bbox_ymax", df["ann_bbox_ymin"] + df["ann_bbox_height"])
 
 	# debug print(df.info())
+	# DEBUG:
+	# print(df.info())
+	# print(categories.info())
 
 	# Join the annotions with the information about the image to add the image columns to the dataframe
 	df = pd.merge(images, df, left_on="img_id", right_on="ann_image_id", how="left")
@@ -175,35 +183,37 @@ def ImportCoco_PBVS(path, path_to_images=None, name=None, encoding="utf-8"):
 
 
 def convert_all_folder_coco_to_yolo():
-	# Init file
-	path_folder_lbl_in = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/annotations/train/"
-	path_folder_img_in = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/images/train/"
+	split_types    = ["train","val"]
+	for split_type in split_types:
+		# Init file
+		path_folder_lbl_in = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/{split_type}/"
+		path_folder_img_in = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/images/{split_type}/"
 
-	# get list folder
-	list_seqs = os.listdir(path_folder_lbl_in)
+		# get list folder
+		list_seqs = os.listdir(path_folder_lbl_in)
 
-	# loop to export dataset
-	for seq in tqdm(list_seqs):
-		# get path file
-		path_file_in      = os.path.join(path_folder_lbl_in, seq, 'thermal/COCO/annotations.json')
-		path_dir_ou       = os.path.join(path_folder_lbl_in, seq, 'thermal/yolo')
-		path_dir_img      = os.path.join(path_folder_img_in, seq, 'thermal')
+		# loop to export dataset
+		for seq in tqdm(list_seqs):
+			# get path file
+			path_file_in      = os.path.join(path_folder_lbl_in, seq, 'thermal/COCO/annotations.json')
+			path_dir_ou       = os.path.join(path_folder_lbl_in, seq, 'thermal/yolo')
+			path_dir_img      = os.path.join(path_folder_img_in, seq, 'thermal')
 
-		# create folder
-		os.makedirs(path_dir_ou, exist_ok=True)
+			# create folder
+			os.makedirs(path_dir_ou, exist_ok=True)
 
-		# load dataset
-		dataset = ImportCoco_PBVS(path_file_in, path_to_images=path_dir_img, name="pbvs_coco")
+			# load dataset
+			dataset = ImportCoco_PBVS(path_file_in, path_to_images=path_dir_img, name="pbvs_coco")
 
-		# export txts
-		dataset.export.ExportToYoloV5(
-			output_path   = path_dir_ou,
-			cat_id_index = 0  # 0: cat_id
-		)[0]
+			# export txts
+			dataset.export.ExportToYoloV5(
+				output_path   = path_dir_ou,
+				cat_id_index = 0  # 0: cat_id
+			)[0]
 
-		# DEBUG:
-		# print(dataset.df.columns)
-		# break
+			# DEBUG:
+			# print(dataset.df.columns)
+			# break
 
 
 def convert_coco_to_mot(seq, path_file_in, path_file_ou, path_dir_img):
@@ -258,67 +268,71 @@ def convert_coco_to_mot(seq, path_file_in, path_file_ou, path_dir_img):
 
 
 def convert_all_format_coco_to_mot():
-	# Init file
-	path_folder_lbl_in = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/annotations/train/"
-	path_folder_img_in = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/images/train/"
+	split_types    = ["train","val"]
+	for split_type in split_types:
+		# Init file
+		path_folder_lbl_in = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/{split_type}/"
+		path_folder_img_in = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/images/{split_type}/"
 
-	# get list folder
-	list_seqs = os.listdir(path_folder_lbl_in)
+		# get list folder
+		list_seqs = os.listdir(path_folder_lbl_in)
 
-	# loop to export dataset
-	for seq in tqdm(list_seqs):
-		# get path file
-		path_file_in      = os.path.join(path_folder_lbl_in, seq, 'thermal/COCO/annotations.json')
-		# path_file_ou      = os.path.join(path_folder_lbl_in, seq, 'thermal/annotations_mot.txt')
-		path_file_ou      = os.path.join(path_folder_lbl_in, seq, f'thermal/{seq}_thermal.txt')
-		path_dir_img      = os.path.join(path_folder_img_in, seq, 'thermal')
+		# loop to export dataset
+		for seq in tqdm(list_seqs):
+			# get path file
+			path_file_in      = os.path.join(path_folder_lbl_in, seq, 'thermal/COCO/annotations.json')
+			# path_file_ou      = os.path.join(path_folder_lbl_in, seq, 'thermal/annotations_mot.txt')
+			path_file_ou      = os.path.join(path_folder_lbl_in, seq, f'thermal/{seq}_thermal.txt')
+			path_dir_img      = os.path.join(path_folder_img_in, seq, 'thermal')
 
-		# '{frame},{id},{x1},{y1},{w},{h},{s},{label},-1,-1\n'
-		# export txts
-		convert_coco_to_mot(seq, path_file_in, path_file_ou, path_dir_img)
+			# '{frame},{id},{x1},{y1},{w},{h},{s},{label},-1,-1\n'
+			# export txts
+			convert_coco_to_mot(seq, path_file_in, path_file_ou, path_dir_img)
 
 
 def copy_yolo_dataset_for_training():
-	# Init file
-	path_folder_lbl_in  = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/annotations/train/"
-	path_folder_img_in  = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/images/train/"
-	path_folder_yolo_ou = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/yolo_format/"
+	split_types    = ["train","val"]
+	for split_type in split_types:
+		# Init file
+		path_folder_lbl_in  = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/{split_type}/"
+		path_folder_img_in  = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/images/{split_type}/"
+		path_folder_yolo_ou = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/yolo_format/"
 
-	# create folder
-	path_folder_lbl_yolo_ou = os.path.join(path_folder_yolo_ou, "train/labels")
-	path_folder_img_yolo_ou = os.path.join(path_folder_yolo_ou, "train/images")
-	os.makedirs(path_folder_lbl_yolo_ou, exist_ok=True)
-	os.makedirs(path_folder_img_yolo_ou, exist_ok=True)
+		# create folder
+		path_folder_lbl_yolo_ou = os.path.join(path_folder_yolo_ou, f"{split_type}/labels")
+		path_folder_img_yolo_ou = os.path.join(path_folder_yolo_ou, f"{split_type}/images")
+		os.makedirs(path_folder_lbl_yolo_ou, exist_ok=True)
+		os.makedirs(path_folder_img_yolo_ou, exist_ok=True)
 
-	# get list folder
-	list_seqs = os.listdir(path_folder_lbl_in)
-
-	# loop to export dataset
-	for seq in tqdm(list_seqs):
-		# get path file
-		path_dir_lbl_in = os.path.join(path_folder_lbl_in, seq, 'thermal/yolo')
-		path_dir_img_in = os.path.join(path_folder_img_in, seq, 'thermal')
-
-		# get list file
-		list_files = os.listdir(path_dir_lbl_in)
+		# get list folder
+		list_seqs = os.listdir(path_folder_lbl_in)
 
 		# loop to export dataset
-		for file in list_files:
+		for seq in tqdm(list_seqs):
 			# get path file
-			path_file_lbl_in = os.path.join(path_dir_lbl_in, file)
-			path_file_img_in = os.path.join(path_dir_img_in, file.replace('.txt', '.png'))
+			path_dir_lbl_in = os.path.join(path_folder_lbl_in, seq, 'thermal/yolo')
+			path_dir_img_in = os.path.join(path_folder_img_in, seq, 'thermal')
 
-			# check file exist
-			if not exists(path_file_img_in):
-				continue
+			# get list file
+			list_files = os.listdir(path_dir_lbl_in)
 
-			# get path file out
-			path_file_lbl_ou = os.path.join(path_folder_lbl_yolo_ou, file)
-			path_file_img_ou = os.path.join(path_folder_img_yolo_ou, file.replace('.txt', '.png'))
+			# loop to export dataset
+			for file in list_files:
+				# get path file
+				path_file_lbl_in = os.path.join(path_dir_lbl_in, file)
+				path_file_img_in = os.path.join(path_dir_img_in, file.replace('.txt', '.png'))
 
-			# copy file
-			shutil.copyfile(path_file_lbl_in, path_file_lbl_ou)
-			shutil.copyfile(path_file_img_in, path_file_img_ou)
+				# check file exist
+				if not exists(path_file_img_in):
+					continue
+
+				# get path file out
+				path_file_lbl_ou = os.path.join(path_folder_lbl_yolo_ou, file)
+				path_file_img_ou = os.path.join(path_folder_img_yolo_ou, file.replace('.txt', '.png'))
+
+				# copy file
+				shutil.copyfile(path_file_lbl_in, path_file_lbl_ou)
+				shutil.copyfile(path_file_img_in, path_file_img_ou)
 
 
 def main():
@@ -326,7 +340,7 @@ def main():
 
 	# convert_all_format_coco_to_mot()
 
-	# copy_yolo_dataset_for_training()
+	copy_yolo_dataset_for_training()
 	pass
 
 

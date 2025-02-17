@@ -566,12 +566,12 @@ def evaluate_sequence(trackDB, gtDB, distractor_ids=np.ndarray([]), iou_thres=0.
 
 def evaluate_tracking():
 	# Init file
-	folder_lbl_gt_in = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/annotations/val/"  # ground truth
-	folder_lbl_tr_in = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/annotations/val/"  # tracking result
-	folder_re_ou     = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset/result/"  # result folder
+	folder_lbl_gt_in = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/"  # ground truth
+	folder_lbl_tr_in = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/"  # tracking result
+	folder_re_ou     = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/"  # result folder
 
 	# create output file
-	file_re_ou  = os.path.join(folder_re_ou, f'thermal_tracking_evaluation_eesult.txt')
+	file_re_ou  = os.path.join(folder_re_ou, f'thermal_tracking_evaluation_result.txt')
 	with open(file_re_ou, 'w') as f_write:
 		pass
 
