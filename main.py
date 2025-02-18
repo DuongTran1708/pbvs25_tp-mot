@@ -14,12 +14,12 @@ from time import perf_counter
 
 import yaml
 
-from core.utils.rich import console
-from motordriver.cameras import (
-	TrafficSafetyCamera
+from thermal_pedestrian.core.utils.rich import console
+from thermal_pedestrian.cameras import (
+	ThermalCamera
 )
 
-from configuration import (
+from thermal_pedestrian.configuration import (
 	data_dir,
 	config_dir,
 	load_config
@@ -66,8 +66,7 @@ parser.add_argument(
 
 def main():
 	# NOTE: init camera
-	# Camera = TrafficSafetyCameraMultiThread
-	Camera = TrafficSafetyCamera
+	Camera = ThermalCamera
 
 	# NOTE: Start timer
 	process_start_time = perf_counter()

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
+"""Implement several data classes.
 """
 
 from __future__ import annotations
 
-from .thermal_camera import ThermalCamera
+# from .class_label import *

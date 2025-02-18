@@ -181,3 +181,4 @@ cython_debug/
 
 # temp file from pc
 *.sugarubuntu
+/models_zoo/

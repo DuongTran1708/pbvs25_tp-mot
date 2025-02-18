@@ -520,36 +520,59 @@ def evaliation_coco_result(annFile, resFile):
 	cocoEval.evaluate()
 	cocoEval.accumulate()
 	cocoEval.summarize()
-	return str(cocoEval.stats)
+
+	return cocoEval.stats
 
 
 def evaluate_detection():
 	# Init file
-	folder_lbl_in = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/"
-	folder_img_in = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/images/val/"
-	# goundtruth
-	file_gt       = f"{folder_lbl_in}seq2/thermal/COCO/annotations.json"
-	# yolo result
-	folder_yolo   = f"{folder_lbl_in}seq2/thermal/yolo"
-	folder_img    = f"{folder_img_in}seq2/thermal/"
+	folder_lbl_gt_in = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/"
+	folder_img_gt_in = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/images/val/"
+
 	# evaluation result
 	folder_out_temp = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/"
 	file_result_ou  = f"{folder_out_temp}object_detection_result.txt"
 
 	# get list folder
-	list_seqs = sorted(os.listdir(folder_lbl_in))
+	list_seqs = os.listdir(folder_lbl_gt_in)
 
 	# loop to export dataset
-	with open(file_result_ou, "w") as f_ou:
-		for seq in tqdm(list_seqs):
-			# output conversion from yolo to coco
-			file_re       = f"{folder_out_temp}{seq}_od_result_conversion.json"
+	for seq in tqdm(list_seqs):
+		# goundtruth
+		file_gt       = f"{folder_lbl_gt_in}seq2/thermal/COCO/annotations.json"
 
-			convert_yolo_result_to_coco_result(folder_img, folder_yolo, file_re)
+		# yolo result
+		folder_yolo   = f"{folder_lbl_gt_in}seq2/thermal/yolo"
+		folder_img    = f"{folder_img_gt_in}seq2/thermal/"
 
-			# file_re     = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/seq2_od_result_example.json"
-			f_ou.write(f"Detection evaluation for {seq}:\n")
-			f_ou.write(f"{evaliation_coco_result(file_gt, file_re)}\n\n")
+
+		# get list folder
+		list_seqs = sorted(os.listdir(folder_lbl_gt_in))
+
+		# loop to export dataset
+		with open(file_result_ou, "w") as f_ou:
+			for seq in tqdm(list_seqs):
+				# output conversion from yolo to coco
+				file_re       = f"{folder_out_temp}{seq}_od_result_conversion.json"
+
+				convert_yolo_result_to_coco_result(folder_img, folder_yolo, file_re)
+
+				# file_re     = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/seq2_od_result_example.json"
+				f_ou.write(f"Detection evaluation for {seq}:\n")
+				stats = evaliation_coco_result(file_gt, file_re)
+				f_ou.write(f"Average Precision (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = {float(stats[0]):.3f}\n")
+				f_ou.write(f"Average Precision (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = {float(stats[1]):.3f}\n")
+				f_ou.write(f"Average Precision (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = {float(stats[2]):.3f}\n")
+				f_ou.write(f"Average Precision (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = {float(stats[3]):.3f}\n")
+				f_ou.write(f"Average Precision (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = {float(stats[4]):.3f}\n")
+				f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = {float(stats[5]):.3f}\n")
+				f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = {float(stats[6]):.3f}\n")
+				f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = {float(stats[7]):.3f}\n")
+				f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = {float(stats[8]):.3f}\n")
+				f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = {float(stats[9]):.3f}\n")
+				f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = {float(stats[10]):.3f}\n")
+				f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = {float(stats[11]):.3f}\n")
+				f_ou.write(f"\n")
 
 def check_json():
 	with open("/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/seq2_od_result_example.json") as f_in:
