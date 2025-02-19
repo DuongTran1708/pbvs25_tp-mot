@@ -27,7 +27,7 @@ __all__ = [
 ]
 
 
-# MARK: - BaseAdapter
+# MARK: - BaseDetector
 
 # noinspection PyShadowingBuiltins
 class BaseDetector(metaclass=abc.ABCMeta):

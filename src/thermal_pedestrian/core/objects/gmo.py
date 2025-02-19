@@ -33,7 +33,7 @@ from matcher.roi import ROI
 
 # MARK: - GMO (General Moving Object)
 
-class GMO(GeneralObject, MotionModel, MovingModel, MotorbikeDriverModel):
+class GMO(GeneralObject, MotionModel):
 	# MARK: Class Property
 	
 	min_entering_distance: int = 0

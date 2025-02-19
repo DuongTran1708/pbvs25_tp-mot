@@ -552,7 +552,10 @@ class AutoBackend(nn.Module):
 
         # PyTorch
         if self.pt or self.nn_module:
-            y = self.model(im, augment=augment, visualize=visualize, embed=embed)
+            # SUGAR: cai embed cha biet de lam gi????????
+            # no gay ra cai loi nay TypeError: Ensemble.forward() got an unexpected keyword argument 'embed'
+            # y = self.model(im, augment=augment, visualize=visualize, embed=embed)
+            y = self.model(im, augment=augment, visualize=visualize)
 
         # TorchScript
         elif self.jit:

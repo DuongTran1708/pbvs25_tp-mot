@@ -31,21 +31,21 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 parser = argparse.ArgumentParser(description="Config parser")
 parser.add_argument(
-	"--config", default="aic23.yaml",
+	"--config", default="pbvs25_thermal_mot.yaml",
 	help="Config file for each camera. Final path to the config file."
 )
 parser.add_argument(
-	"--dataset", default="aic23_trafficsafety",
+	"--dataset", default="pbvs25_thermal",
 	help="Dataset to run on."
 )
 parser.add_argument(
-	"--run_image", action='store_true', help="Should run detection."
+	"--run_image", action='store_true', help="Should run on images."
 )
 parser.add_argument(
-	"--detection", action='store_true', help="Should run detection."
+	"--detection", action='store_true', help="Should run detection process."
 )
 parser.add_argument(
-	"--identification", action='store_true', help="Should run identification."
+	"--tracking", action='store_true', help="Should run tracking process."
 )
 parser.add_argument(
 	"--heuristic", action='store_true', help="Should run heuristic process."
@@ -78,13 +78,13 @@ def main():
 
 	# NOTE: Update value from args
 	camera_cfg["dataset"]      = args.dataset
-	camera_cfg["verbose"]      = args.verbose
+	camera_cfg["verbose"]      = args.verbose # Show the result while running process.
 	camera_cfg["drawing"]      = args.drawing # Draw the result.
 	camera_cfg["process"]      = {
 		"run_image"             : args.run_image     , # All run with image    , not video
 		"function_detection"    : args.detection     , # Detection
-		"function_identify"     : args.identification, # Identification
-		"function_heuristic"    : args.heuristic,  # Heuristic
+		"function_tracking"     : args.tracking      , # Tracking
+		"function_heuristic"    : args.heuristic     ,  # Heuristic
 		"function_writing_final": args.write_final   , # Writing final results.
 	}
 

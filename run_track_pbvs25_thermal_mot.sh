@@ -35,8 +35,17 @@ echo "********************"
 python utilities/detection_evaluation.py  \
   --img_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/images/val/  \
   --gt_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/  \
-  --det_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/detection/yolov8s_1280/  \
-  --ou_file /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/detection/yolov8s_1280/object_detection_result.txt  \
+  --det_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/detection/yolov8s_640_960_1280_1600_imgz_1280/  \
+  --ou_file /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/detection/yolov8s_640_960_1280_1600_imgz_1280/object_detection_result.txt  \
+
+# NOTE: TRACKING PROCESS
+#echo "****************"
+#echo "TRACKING PROCESS"
+#echo "****************"
+#python main.py  \
+#    --tracking  \
+#    --run_image  \
+#    --config $DIR_TSS"/configs/pbvs25_thermal_mot.yaml"
 
 
 echo "###########################"
