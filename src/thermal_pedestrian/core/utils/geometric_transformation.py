@@ -43,12 +43,18 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor
 from torchvision.transforms import functional as F
-from torchvision.transforms import functional_pil as F_pil
-from torchvision.transforms import functional_tensor as F_t
+
 from torchvision.transforms.functional import center_crop
 from torchvision.transforms.functional import crop
 from torchvision.transforms.functional import resized_crop
-
+try:
+	from torchvision.transforms import functional_pil as F_pil
+except ImportError:
+	from torchvision.transforms import _functional_pil as F_pil
+try:
+	from torchvision.transforms import functional_tensor as F_t
+except ImportError:
+	from torchvision.transforms import _functional_tensor as F_t
 
 from thermal_pedestrian.core.type.type import Color
 from thermal_pedestrian.core.type.type import Dim2

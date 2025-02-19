@@ -19,10 +19,6 @@ data:
   process_num: 3
   # Number of processes which runs in parallel
 
-class_labels:
-  file: "configs/class_labels_1cls.json"
-    # Config file containing class_labels.
-
 data_loader:
   data: "images"
   # Data source. Can be a path to an image file, a directory, a video, or
@@ -51,7 +47,7 @@ detector:
   # Pretrained weights file.
   shape: [1280, 1280, 3]
   # Input size as [C, H, W].
-  min_confidence: 0.2
+  min_confidence: 0.0001
   # Detection confidence threshold. Disregard all detections that have a
   # confidence lower than this value.
   nms_max_overlap: 0.5
@@ -60,17 +56,15 @@ detector:
   # CUDDevice, i.e. 0 or 0,1,2,3 or cpu
   batch_size: *batch_size
   # Number of samples in one forward & backward pass.
-  folder_out: "yolov8x_1536_1cls_track_5_24_23_v2_1536"
+  folder_out: "yolov8s_1280"
   # The output folder
   class_labels:
-    file: "class_labels_1cls.json"
+    file: "configs/class_labels_1cls.json"
     # Config file containing class_labels.
   queue_size: 30
   # Number of slot in the queue to store the detection result
 
 tracker:
-  api: "scikit-learn"
-  # Name of the API that the tracker model is implemented from. Possible values: ["scikit-learn"].
   name: "sort_kalman_bbox"
   # Name of the tracker.
   max_age: 10
@@ -82,7 +76,7 @@ tracker:
   # The Intersection over Union between two track with their bounding box.
 
 data_writer:
-  dst: "output_pbvs25"
+  output_dir: "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25"
   # Output video file or a directory.
   shape: *shape
   # Output size [H, W, C].
@@ -92,7 +86,7 @@ data_writer:
   # Video codec. One of: ["mp4v", "xvid", "mjpg", "wmv1"].
   queue_size: 30
   # Number of slot in the queue to store data for writer
-  min_confidence: 0.0001
+  min_confidence: 0.2
   # Detection confidence threshold. Disregard all detections that have a
   # confidence lower than this value.
   final_file: "final_result.txt"

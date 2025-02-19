@@ -21,15 +21,8 @@ if "DIR_TSS" in os.environ:
 else:
     root_dir   = os.path.dirname(os.path.abspath(__file__))  	    # "src/motor"
 
-src_dir        = os.path.join(root_dir, "motor")                	# "src/motor/motor"
 config_dir     = os.path.join(root_dir, "configs")              	# "src/motor/configs"
-models_zoo_dir = os.path.join(root_dir, "models")        			# "src/motor/models_zoo"
-if "DIR_DATA" in os.environ:
-    data_dir     = os.environ["DIR_DATA"]
-    result_dir   = os.environ["DIR_RESULT"]
-else:
-    data_dir     = os.path.join(root_dir, "data")              		# "src/motor/data"
-    result_dir   = os.path.join(root_dir, "data")              		# "src/motor/data"
+models_zoo_dir = os.path.join(root_dir, "models")        			# "models_zoo"
 
 # MARK: - Process Config
 

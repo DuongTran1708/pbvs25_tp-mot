@@ -117,15 +117,16 @@ class FrameLoader:
 
 				if self.video_capture:
 					ret_val, image = self.video_capture.read()
+					file           = self.data
 					rel_path 	   = os.path.basename(self.data)
 				else:
 					image	 = cv2.imread(self.image_files[self.index])
 					file     = self.image_files[self.index]
 					rel_path = file.replace(self.data, "")
 
-					# SUGAR: using this for get the absolute path of image
-					if file is not None:
-						files.append(file)
+				# SUGAR: using this for get the absolute path of image or video
+				if file is not None:
+					files.append(file)
 
 				# NOTE: remove unconsidered region
 				if self.ignore_region is not None:

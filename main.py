@@ -20,7 +20,6 @@ from thermal_pedestrian.cameras import (
 )
 
 from thermal_pedestrian.configuration import (
-	data_dir,
 	config_dir,
 	load_config
 )

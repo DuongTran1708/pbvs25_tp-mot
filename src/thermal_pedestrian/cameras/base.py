@@ -66,31 +66,3 @@ class BaseCamera(metaclass=abc.ABCMeta):
     def run_routine_end(self):
         """Perform operations when run routine ends."""
         pass
-
-    @abc.abstractmethod
-    def postprocess(self, image: np.ndarray, *args, **kwargs):
-        """Perform some postprocessing operations when a run step end.
-
-        Args:
-            image (np.ndarray):
-                Image.
-        """
-        pass
-
-    # MARK: Visualize
-
-    @abc.abstractmethod
-    def draw(self, drawing: np.ndarray, elapsed_time: float) -> np.ndarray:
-        """Visualize the results on the drawing.
-
-        Args:
-            drawing (np.ndarray):
-                Drawing canvas.
-            elapsed_time (float):
-                Elapsed time per iteration.
-
-        Returns:
-            drawing (np.ndarray):
-                Drawn canvas.
-        """
-        pass

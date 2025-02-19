@@ -1,3 +1,4 @@
+import argparse
 import glob
 import json
 import math
@@ -159,10 +160,10 @@ def ImportYoloV5_PBVS(
 			else:
 				img_depth = im.shape[2]  # 3 for color images
 
-			row["img_id"] = img_id
-			row["img_width"] = img_width
+			row["img_id"]     = img_id
+			row["img_width"]  = img_width
 			row["img_height"] = img_height
-			row["img_depth"] = img_depth
+			row["img_depth"]  = img_depth
 
 			# Read the annotation in the file
 			# Check if the file has at least one line:
@@ -178,13 +179,24 @@ def ImportYoloV5_PBVS(
 					# check if the row is empty, leave annotation columns blank
 					if line:
 						d[row_id] = copy.deepcopy(row)
-						(
-							cat_id,
-							x_center_norm,
-							y_center_norm,
-							width_norm,
-							height_norm,
-						) = line.split()
+						score = float(random.randint(60, 90) / 100)  # SUGAR: add score for detection if they are ground truth
+						try:
+							(
+								cat_id,
+								x_center_norm,
+								y_center_norm,
+								width_norm,
+								height_norm,
+							) = line.split()
+						except ValueError:
+							(
+								cat_id,
+								x_center_norm,
+								y_center_norm,
+								width_norm,
+								height_norm,
+								score,
+							) = line.split()
 
 						row["ann_bbox_width"] = float(width_norm) * img_width
 						row["ann_bbox_height"] = float(height_norm) * img_height
@@ -200,7 +212,7 @@ def ImportYoloV5_PBVS(
 						row["ann_bbox_ymin"] = (
 								row["ann_bbox_ymax"] - row["ann_bbox_height"]
 						)
-
+						row["ann_score"] = float(score) # SUGAR:
 						row["ann_area"] = row["ann_bbox_width"] * row["ann_bbox_height"]
 
 						row["cat_id"] = cat_id
@@ -524,55 +536,50 @@ def evaliation_coco_result(annFile, resFile):
 	return cocoEval.stats
 
 
-def evaluate_detection():
+def evaluate_detection(args):
 	# Init file
-	folder_lbl_gt_in = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/"
-	folder_img_gt_in = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/images/val/"
+	folder_img_gt_in = args.img_folder
+	folder_lbl_gt_in = args.gt_folder
 
 	# evaluation result
-	folder_out_temp = f"/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/"
-	file_result_ou  = f"{folder_out_temp}object_detection_result.txt"
+	folder_out_temp = args.det_folder
+	file_result_ou  = args.ou_file
 
 	# get list folder
-	list_seqs = os.listdir(folder_lbl_gt_in)
+	list_seqs = [ name for name in os.listdir(folder_lbl_gt_in) if os.path.isdir(os.path.join(folder_lbl_gt_in, name)) ]
 
-	# loop to export dataset
-	for seq in tqdm(list_seqs):
-		# goundtruth
-		file_gt       = f"{folder_lbl_gt_in}seq2/thermal/COCO/annotations.json"
-
-		# yolo result
-		folder_yolo   = f"{folder_lbl_gt_in}seq2/thermal/yolo"
-		folder_img    = f"{folder_img_gt_in}seq2/thermal/"
-
-
-		# get list folder
-		list_seqs = sorted(os.listdir(folder_lbl_gt_in))
-
+	with open(file_result_ou, "w") as f_ou:
 		# loop to export dataset
-		with open(file_result_ou, "w") as f_ou:
-			for seq in tqdm(list_seqs):
-				# output conversion from yolo to coco
-				file_re       = f"{folder_out_temp}{seq}_od_result_conversion.json"
+		for seq in tqdm(list_seqs):
+			# goundtruth
+			file_gt       = os.path.join(folder_lbl_gt_in, seq, "thermal/COCO/annotations.json")
 
-				convert_yolo_result_to_coco_result(folder_img, folder_yolo, file_re)
+			# yolo result
+			folder_img    = os.path.join(folder_img_gt_in, seq, "thermal")
+			folder_yolo   = os.path.join(folder_out_temp, seq, "thermal/yolo")
 
-				# file_re     = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/seq2_od_result_example.json"
-				f_ou.write(f"Detection evaluation for {seq}:\n")
-				stats = evaliation_coco_result(file_gt, file_re)
-				f_ou.write(f"Average Precision (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = {float(stats[0]):.3f}\n")
-				f_ou.write(f"Average Precision (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = {float(stats[1]):.3f}\n")
-				f_ou.write(f"Average Precision (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = {float(stats[2]):.3f}\n")
-				f_ou.write(f"Average Precision (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = {float(stats[3]):.3f}\n")
-				f_ou.write(f"Average Precision (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = {float(stats[4]):.3f}\n")
-				f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = {float(stats[5]):.3f}\n")
-				f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = {float(stats[6]):.3f}\n")
-				f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = {float(stats[7]):.3f}\n")
-				f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = {float(stats[8]):.3f}\n")
-				f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = {float(stats[9]):.3f}\n")
-				f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = {float(stats[10]):.3f}\n")
-				f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = {float(stats[11]):.3f}\n")
-				f_ou.write(f"\n")
+			# output conversion from yolo to coco
+			file_re       = os.path.join(folder_out_temp, f"{seq}_od_result_conversion.json")
+
+			convert_yolo_result_to_coco_result(folder_img, folder_yolo, file_re)
+
+			# file_re     = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/seq2_od_result_example.json"
+			stats = evaliation_coco_result(file_gt, file_re)
+
+			f_ou.write(f"Detection evaluation for {seq}:\n")
+			f_ou.write(f"Average Precision (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = {float(stats[0]):.3f}\n")
+			f_ou.write(f"Average Precision (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = {float(stats[1]):.3f}\n")
+			f_ou.write(f"Average Precision (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = {float(stats[2]):.3f}\n")
+			f_ou.write(f"Average Precision (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = {float(stats[3]):.3f}\n")
+			f_ou.write(f"Average Precision (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = {float(stats[4]):.3f}\n")
+			f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = {float(stats[5]):.3f}\n")
+			f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = {float(stats[6]):.3f}\n")
+			f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = {float(stats[7]):.3f}\n")
+			f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = {float(stats[8]):.3f}\n")
+			f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = {float(stats[9]):.3f}\n")
+			f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = {float(stats[10]):.3f}\n")
+			f_ou.write(f"Average Recall    (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = {float(stats[11]):.3f}\n")
+			f_ou.write(f"\n")
 
 def check_json():
 	with open("/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/seq2_od_result_example.json") as f_in:
@@ -589,12 +596,21 @@ def check_json():
 			f_write.write(f"{ann['image_id']} {ann['id']}\n")
 
 if __name__ == '__main__':
-	# parser = argparse.ArgumentParser(description='MTMC Evaluation')
-	# parser.add_argument('--re', help='Tracking result', type=str)
-	# parser.add_argument('--gt', help='Ground-truth annotation', type=str)
-	# parser.add_argument('--ou', help='Evaluation result', type=str)
-	# args = parser.parse_args()
+	parser = argparse.ArgumentParser(description='Object detection evaluation bases on COCO format')
+	parser.add_argument('--img_folder',help='Folder of Image', type=str,
+	                    default="/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/images/val/"
+	                    )
+	parser.add_argument('--gt_folder', help='Folder of Ground-truth annotation', type=str,
+	                    default="/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/"
+	                    )
+	parser.add_argument('--det_folder', help='Folder of Detection result', type=str,
+	                    default="/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/"
+	                    )
+	parser.add_argument('--ou_file', help='File of Evaluation result', type=str,
+						default="/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/object_detection_result.txt"
+	                    )
+	args = parser.parse_args()
 
-	evaluate_detection()
+	evaluate_detection(args)
 
 	# check_json()
