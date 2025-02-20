@@ -11,4 +11,4 @@ from __future__ import annotations
 # from .general_object import GeneralObject
 # from .moving_model import MovingModel, MovingState
 # from .motion_model import MotionModel
-# from .gmo import GMO
+# from .gmo import General_Moving_Object

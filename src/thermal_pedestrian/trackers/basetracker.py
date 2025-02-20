@@ -30,7 +30,7 @@ from typing import Optional
 from typing import Union
 
 import numpy as np
-from thermal_pedestrian.core.objects.gmo import GMO
+from thermal_pedestrian.core.objects.gmo import General_Moving_Object
 from thermal_pedestrian.core.utils.rich import console, error_console
 
 
@@ -59,7 +59,7 @@ class BaseTracker(metaclass=abc.ABCMeta):
 		self.min_hits          = min_hits
 		self.iou_threshold     = iou_threshold
 		self.frame_count       = 0
-		self.tracks: List[GMO] = []
+		self.tracks: List[General_Moving_Object] = []
 	
 	# MARK: Update
 	

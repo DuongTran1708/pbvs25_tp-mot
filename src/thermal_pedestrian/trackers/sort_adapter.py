@@ -108,7 +108,7 @@ class SORT(BaseTracker):
 		for m in matched:
 			track_idx     = m[1]
 			detection_idx = m[0]
-			# HERE, we call ``GMO.update_gmo()``. This contains all necessary functions to update the whole GMO object.
+			# HERE, we call ``General_Moving_Object.update_gmo()``. This contains all necessary functions to update the whole General_Moving_Object object.
 			self.tracks[track_idx].update_gmo(detections[detection_idx])
 
 		# IF you don't call the function above, then call the following functions:

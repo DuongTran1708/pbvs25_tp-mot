@@ -23,7 +23,7 @@ from typing import Union
 import numpy as np
 from filterpy.kalman import KalmanFilter
 
-from thermal_pedestrian.core.objects.gmo import GMO
+from thermal_pedestrian.core.objects.gmo import General_Moving_Object
 from thermal_pedestrian.core.objects.instance import Instance
 from thermal_pedestrian.core.utils.bbox import (
 	bbox_xyxy_to_z,
@@ -40,7 +40,7 @@ __all__ = [
 
 # MARK: - Track
 
-class KalmanBBoxTrack(GMO):
+class KalmanBBoxTrack(General_Moving_Object):
 	"""Kalman Bounding Box Track
 	"""
 
@@ -60,20 +60,20 @@ class KalmanBBoxTrack(GMO):
 		self.kf.Q[-1, -1] *= 0.01
 		self.kf.Q[4:, 4:] *= 0.01
 		
-		# Here we assume that the ``GMO`` object has already been init().
+		# Here we assume that the ``General_Moving_Object`` object has already been init().
 		# So ``self.current_bbox`` return the first bbox value.
 		self.kf.x[:4] = bbox_xyxy_to_z(self.current_bbox)
 	
 	@classmethod
 	def track_from_detection(cls, instance: Instance, **kwargs):
-		"""Create ``GMO`` object from ``Instance`` object.
+		"""Create ``General_Moving_Object`` object from ``Instance`` object.
 		
 		Args:
 			instance (Instance):
 		
 		Returns:
-			gmo (GMO):
-				The GMO object.
+			gmo (General_Moving_Object):
+				The General_Moving_Object object.
 		"""
 		return cls(
 			frame_index = instance.frame_index,

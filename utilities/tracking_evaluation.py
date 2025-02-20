@@ -60,9 +60,6 @@ def print_metrics_ext(seq, file_re_ou, header, metrics, extra_info, banner=30):
 		for (start, end) in splits]))
 	print('\n\n')
 
-	# DEBUG:
-	print([metrics[start:end] for (start, end) in splits])
-
 	with open(file_re_ou, "a") as f_write:
 		f_write.write(f"\n\n--Evaluate {seq} -- \n")
 
@@ -586,6 +583,8 @@ def evaluate_tracking(args):
 	# get list folder
 	list_seqs = sorted(os.listdir(folder_lbl_gt_in))
 
+
+	metrics_seqs = []
 	# loop to export dataset
 	for seq in tqdm(list_seqs):
 		# get path file
@@ -602,6 +601,14 @@ def evaluate_tracking(args):
 		# print metrics
 		print_metrics_ext(seq, file_re_ou, f' Evaluation {seq}', metrics, extra_info)
 		# print_idmetrics(seq, file_re_ou, ' Evaluation', metrics, extra_info)
+
+		# append metrics sequences
+		metrics_seqs.append(metrics)
+
+	# calculate avarage
+	metrics_seqs = np.array(metrics_seqs)
+	metrics      = np.mean(metrics_seqs, axis=0)
+	print_metrics_ext(seq, file_re_ou, f' Evaluation avarage', metrics, extra_info)
 
 
 if __name__ == '__main__':

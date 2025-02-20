@@ -29,9 +29,9 @@ from thermal_pedestrian.core.objects.moving_model import(
 from thermal_pedestrian.core.objects.driver_model import MotorbikeDriverModel
 from thermal_pedestrian.core.objects.motion_model import MotionModel
 
-# MARK: - GMO (General Moving Object)
+# MARK: - General_Moving_Object (General Moving Object)
 
-class GMO(GeneralObject, MotionModel):
+class General_Moving_Object(GeneralObject, MotionModel):
 	# MARK: Class Property
 	
 	min_entering_distance: int = 0

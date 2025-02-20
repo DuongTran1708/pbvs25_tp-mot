@@ -328,19 +328,33 @@ class ThermalCamera(BaseCamera):
 
 				# load yolo detection
 				# class_id, c_xn, c_yn, wn, hw, score
-				dets = np.loadtxt(det_path, dtype=np.float32, delimiter=' ').reshape(-1, 6)
+				try:
+					dets = np.loadtxt(det_path, dtype=np.float32, delimiter=' ').reshape(-1, 6)
+				except ValueError:
+					dets = np.loadtxt(det_path, dtype=np.float32, delimiter=' ').reshape(-1, 5)  # only for groundtruth, because it has no confident score
 
 				# create list of detections for feeding to tracker
 				instances = []
 				for det in dets:
-					instances.append(
-						Instance(
-							frame_index  = img_index,
-							bbox         = np.asarray(covert_bbox_yolo_to_voc_format(det[1: 5], img)),
-							confidence   = det[5],
-							class_label  = self.class_labels.class_labels[0]
-						)
-					)
+					try:
+						instance = Instance(
+									frame_index  = img_index,
+									bbox         = np.asarray(covert_bbox_yolo_to_voc_format(det[1: 5], img)),
+									confidence   = det[5],
+									class_label  = self.class_labels.class_labels[0]
+								)
+					except IndexError:
+						instance =Instance(
+									frame_index  = img_index,
+									bbox         = np.asarray(covert_bbox_yolo_to_voc_format(det[1: 5], img)),
+									confidence   = float(random.randint(60, 90) / 100),
+									class_label  = self.class_labels.class_labels[0]
+								)
+					# if width and height equal 0
+					if instance.bbox[0] == instance.bbox[2] or instance.bbox[1] == instance.bbox[3]:
+						continue
+
+					instances.append(instance)
 
 				# tracking process
 				self.tracker.update(detections=instances)
