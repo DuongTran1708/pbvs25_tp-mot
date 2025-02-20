@@ -28,8 +28,6 @@ from thermal_pedestrian.core.objects.moving_model import(
 )
 from thermal_pedestrian.core.objects.driver_model import MotorbikeDriverModel
 from thermal_pedestrian.core.objects.motion_model import MotionModel
-from matcher.roi import ROI
-
 
 # MARK: - GMO (General Moving Object)
 
@@ -47,10 +45,6 @@ class GMO(GeneralObject, MotionModel):
 		# NOTE: For matching, flow estimation
 		GeneralObject.__init__(self, **kwargs)
 		MotionModel.__init__(self, **kwargs)
-		MovingModel.__init__(self, **kwargs)
-
-		# NOTE: For driver violation detection
-		MotorbikeDriverModel.__init__(self, **kwargs)
 
 	# MARK: Configure
 	
@@ -82,37 +76,6 @@ class GMO(GeneralObject, MotionModel):
 		# NOTE: Second, update motion model
 		self.update_motion_state()
 		
-	def update_moving_state(self, rois: List[ROI], **kwargs):
-		""" Update moving state of object base on the position of object with ROI
-
-		Args:
-			rois (list):
-
-		"""
-		roi = next((roi for roi in rois if roi.uuid == self.roi_uuid), None)
-		if roi is None:
-			return
-
-		if self.is_candidate:
-			if self.hit_streak >= GMO.min_hit_streak and \
-				roi.is_bbox_in_or_touch_roi(bbox_xyxy=self.current_bbox, compute_distance=True) >= GMO.min_entering_distance and \
-				self.travelled_distance >= GMO.min_traveled_distance:
-				self.moving_state = MovingState.Confirmed
-
-		elif self.is_confirmed:
-			if roi.is_bbox_in_or_touch_roi(bbox_xyxy=self.current_bbox) <= 0:
-				self.moving_state = MovingState.Counting
-
-		elif self.is_counting:
-			if roi.is_center_in_or_touch_roi(bbox_xyxy=self.current_bbox) < 0 or \
-				self.time_since_update >= GMO.max_age:
-				self.moving_state = MovingState.ToBeCounted
-
-		elif self.is_counted:
-			if roi.is_center_in_or_touch_roi(bbox_xyxy=self.current_bbox, compute_distance=True) <= 0 or \
-				self.time_since_update >= GMO.max_age:
-				self.moving_state = MovingState.Exiting
-
 	# MARK: Visualize
 
 	def draw(self, drawing, **kwargs):

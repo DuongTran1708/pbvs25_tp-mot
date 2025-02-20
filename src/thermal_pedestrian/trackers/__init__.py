@@ -6,9 +6,7 @@
 # ``tracker`` API consists of several trackers that share the same interface.
 # Hence, they can be swap easily.
 # ==================================================================== #
-from typing import Dict
-
-from munch import Munch
+from __future__ import annotations
 
 from .basetracker import BaseTracker
-from .sort.sort_kalman_bbox import Sort
+from .sort_adapter import SORT

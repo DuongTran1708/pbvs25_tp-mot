@@ -35,13 +35,12 @@ import cv2
 import torch
 import numpy as np
 from tqdm import tqdm
-
 from thermal_pedestrian.configuration import (
 	root_dir,
 	config_dir,
 )
 from thermal_pedestrian.cameras.base import BaseCamera
-from thermal_pedestrian.core.factory.builder import CAMERAS, DETECTORS
+from thermal_pedestrian.core.factory.builder import CAMERAS, DETECTORS, TRACKERS
 from thermal_pedestrian.core.data.class_label import ClassLabels
 from thermal_pedestrian.core.io.frame import FrameLoader
 from thermal_pedestrian.core.io.video import VideoLoader
@@ -51,6 +50,9 @@ from thermal_pedestrian.core.io.filedir import (
 )
 from thermal_pedestrian.core.utils.rich import console
 from thermal_pedestrian.detectors.basedetector import BaseDetector
+from thermal_pedestrian.trackers.basetracker import BaseTracker
+from thermal_pedestrian.core.objects.instance import Instance
+from thermal_pedestrian.core.utils.bbox import bbox_xyxy_to_xywh
 
 __all__ = [
 	"ThermalCamera"
@@ -75,6 +77,7 @@ class ThermalCamera(BaseCamera):
 			dataset      : str,
 			name         : str,
 			detector     : dict,
+			tracker      : dict,
 			data_loader  : dict,
 			data_writer  : Union[FrameWriter,  dict],
 			process      : dict,
@@ -114,7 +117,6 @@ class ThermalCamera(BaseCamera):
 		# NOTE: Init attributes
 		self.start_time = None
 		self.pbar       = None
-		self.detector   = None
 
 		# NOTE: Define attributes
 		self.process         = process
@@ -124,6 +126,7 @@ class ThermalCamera(BaseCamera):
 		# NOTE: Define configurations
 		self.data_cfg        = data
 		self.detector_cfg    = detector
+		self.tracker_cfg     = tracker
 		self.data_loader_cfg = data_loader
 		self.data_writer_cfg = data_writer
 
@@ -153,6 +156,8 @@ class ThermalCamera(BaseCamera):
 		"""
 		if isinstance(class_labels, ClassLabels):
 			self.class_labels = class_labels
+		elif isinstance(class_labels, str):
+			self.class_labels = ClassLabels.create_from_file(class_labels)
 		elif isinstance(class_labels, dict):
 			file = class_labels["file"]
 			if is_json_file(file):
@@ -182,29 +187,45 @@ class ThermalCamera(BaseCamera):
 		else:
 			raise ValueError(f"Cannot initialize detector with {detector}.")
 
+	def init_tracker(self, tracker: Union[BaseTracker, dict]):
+		"""Initialize tracker.
+
+		Args:
+			tracker (BaseTracker, dict):
+				Tracking object or a tracker's config dictionary.
+		"""
+		console.log(f"Initiate BaseTracker.")
+		if isinstance(tracker, BaseTracker):
+			self.tracker = tracker
+		elif isinstance(tracker, dict):
+			self.tracker = TRACKERS.build(**tracker)
+		else:
+			raise ValueError(f"Cannot initialize detector with {tracker}.")
+
 	# MARK: Run
 
 	def run_detector(self):
 		"""Run detection model"""
 		# create directory to store result
-		folder_output_lbl = os.path.join(
+		folder_det_ou = os.path.join(
 			self.data_writer_cfg['output_dir'],
 			"detection",
 			self.detector_cfg['folder_out'],
 			self.data_writer_cfg['seq_cur'],
 			"thermal/yolo"
 		)
-		folder_output_img = os.path.join(
-			self.data_writer_cfg['output_dir'],
-			"detection",
-			self.detector_cfg['folder_out'],
-			self.data_writer_cfg['seq_cur'],
-			"thermal/img_draw"
-		)
+		os.makedirs(folder_det_ou, exist_ok=True)
 
-		# create directory
-		os.makedirs(folder_output_img, exist_ok=True)
-		os.makedirs(folder_output_lbl, exist_ok=True)
+		# DEBUG: draw
+		if self.drawing:
+			folder_img_ou = os.path.join(
+				self.data_writer_cfg['output_dir'],
+				"detection",
+				self.detector_cfg['folder_out'],
+				self.data_writer_cfg['seq_cur'],
+				"thermal/img_draw"
+			)
+			os.makedirs(folder_img_ou, exist_ok=True)
 
 		# load dataloader
 		self.data_loader = FrameLoader(data=self.data_loader_cfg['data_path'], batch_size=self.data_loader_cfg['batch_size'])
@@ -229,7 +250,7 @@ class ThermalCamera(BaseCamera):
 
 					# init output file
 					file_path_txt_ou = os.path.join(
-						folder_output_lbl,
+						folder_det_ou,
 						f"{os.path.splitext(os.path.basename(file_path_img))[0]}.txt"
 					)
 
@@ -253,7 +274,7 @@ class ThermalCamera(BaseCamera):
 
 					# DEBUG: draw
 					if self.drawing:
-						cv2.imwrite(os.path.join(folder_output_img, os.path.basename(file_path_img)), image_draw)
+						cv2.imwrite(os.path.join(folder_img_ou, os.path.basename(file_path_img)), image_draw)
 
 
 				pbar.update(len(indexes))
@@ -261,7 +282,92 @@ class ThermalCamera(BaseCamera):
 
 	def run_tracker(self):
 		"""Run tracking model"""
-		pass
+		# input folder directory to load detection
+		folder_det_in = os.path.join(
+			self.data_writer_cfg['output_dir'],
+			"detection",
+			self.detector_cfg['folder_out'],
+			self.data_writer_cfg['seq_cur'],
+			"thermal/yolo"
+		)
+
+		# create file to store result
+		file_mot_ou = os.path.join(
+			self.data_writer_cfg['output_dir'],
+			"tracking",
+			self.tracker_cfg['folder_out'],
+			self.data_writer_cfg['seq_cur'],
+			"thermal",
+			f"{self.data_writer_cfg['seq_cur']}_thermal.txt"
+		)
+		os.makedirs(os.path.dirname(file_mot_ou), exist_ok=True)
+
+		# DEBUG: draw
+		if self.drawing:
+			folder_img_ou = os.path.join(
+				self.data_writer_cfg['output_dir'],
+				"tracking",
+				self.tracker_cfg['folder_out'],
+				self.data_writer_cfg['seq_cur'],
+				"thermal/img_draw"
+			)
+			os.makedirs(folder_img_ou, exist_ok=True)
+
+		# load list images
+		list_imgs = [s for s in sorted(os.listdir(self.data_loader_cfg['data_path']))]
+
+		with open(file_mot_ou, 'w') as f_write:
+			# run tracking
+			for img_index, img_name in enumerate(tqdm(list_imgs, desc=f"Tracking: {self.data_writer_cfg['seq_cur']}")):
+				# init
+				img_path = os.path.join(self.data_loader_cfg['data_path'], img_name)
+				det_path = os.path.join(folder_det_in, f"{os.path.splitext(img_name)[0]}.txt")
+
+				# load image
+				img = cv2.imread(img_path)
+
+				# load yolo detection
+				# class_id, c_xn, c_yn, wn, hw, score
+				dets = np.loadtxt(det_path, dtype=np.float32, delimiter=' ').reshape(-1, 6)
+
+				# create list of detections for feeding to tracker
+				instances = []
+				for det in dets:
+					instances.append(
+						Instance(
+							frame_index  = img_index,
+							bbox         = np.asarray(covert_bbox_yolo_to_voc_format(det[1: 5], img)),
+							confidence   = det[5],
+							class_label  = self.class_labels.class_labels[0]
+						)
+					)
+
+				# tracking process
+				self.tracker.update(detections=instances)
+				gmos = self.tracker.tracks
+
+				# write result
+				# '{frame},{id},{x1},{y1},{w},{h},{s},{label},-1,-1\n'
+				for gmo in gmos:
+					bbox = bbox_xyxy_to_xywh(gmo.current_bbox)
+					str_out = (f"{img_index + 1},"  # because frame start from 1, PBVS rule
+								f"{gmo.id},"  
+								f"{bbox[0]},"
+								f"{bbox[1]},"
+								f"{bbox[2]},"
+								f"{bbox[3]},"
+								f"{gmo.confidence:.3f},"
+								f"{gmo.current_label['id']},"
+								f"-1,-1\n")
+
+					# DEBUG:
+					# print("********")
+					# print(str_out)
+					# print("********")
+					# sys.exit()
+
+					f_write.write(str_out)
+
 
 	def run_heuristic(self):
 		"""Run heuristic model"""
@@ -285,13 +391,20 @@ class ThermalCamera(BaseCamera):
 				self.data_loader_cfg.data_dir_postfix,
 			)
 			self.data_writer_cfg['seq_cur'] = seq
+			self.init_class_labels(class_labels=os.path.join(self.root_dir, self.data_cfg["class_labels"]["file"]))
 
 			# NOTE: Detection process
 			if self.process["function_detection"]:
-				self.init_class_labels(class_labels=self.detector_cfg['class_labels'])
-				if self.detector is None:
+				if (not hasattr(self, "detector")) or self.detector is None:
 					self.init_detector(detector=self.detector_cfg)
 				self.run_detector()
+
+
+			# NOTE: Tracking process
+			if self.process["function_tracking"]:
+				if (not hasattr(self, "tracker")) or self.tracker is None:
+					self.init_tracker(tracker=self.tracker_cfg)
+				self.run_tracker()
 
 		self.run_routine_end()
 
@@ -321,6 +434,24 @@ class ThermalCamera(BaseCamera):
 
 # MARK - Ultilies
 
+def covert_bbox_yolo_to_voc_format(bbox, img):
+	"""Convert bbox from YOLO format to VOC format
+
+	Args:
+		bbox: YOLO format
+		img: nparray, cv2 image
+
+	Returns:
+
+	"""
+	h, w, _ = img.shape
+	x_min = int(w * max(float(bbox[0]) - float(bbox[2]) / 2, 0))
+	x_max = int(w * min(float(bbox[0]) + float(bbox[2]) / 2, 1))
+	y_min = int(h * max(float(bbox[1]) - float(bbox[3]) / 2, 0))
+	y_max = int(h * min(float(bbox[1]) + float(bbox[3]) / 2, 1))
+	return x_min, y_min, x_max, y_max
+
+
 def plot_one_box(bbox, img, color=None, label=None, line_thickness=1):
 	"""Plots one bounding box on image img
 
@@ -334,11 +465,12 @@ def plot_one_box(bbox, img, color=None, label=None, line_thickness=1):
 	Returns:
 
 	"""
-	h, w, _ = img.shape
-	x_min = int(w * max(float(bbox[0]) - float(bbox[2]) / 2, 0))
-	x_max = int(w * min(float(bbox[0]) + float(bbox[2]) / 2, 1))
-	y_min = int(h * max(float(bbox[1]) - float(bbox[3]) / 2, 0))
-	y_max = int(h * min(float(bbox[1]) + float(bbox[3]) / 2, 1))
+	x_min, y_min, x_max, y_max =  covert_bbox_yolo_to_voc_format(bbox, img)
+	# h, w, _ = img.shape
+	# x_min = int(w * max(float(bbox[0]) - float(bbox[2]) / 2, 0))
+	# x_max = int(w * min(float(bbox[0]) + float(bbox[2]) / 2, 1))
+	# y_min = int(h * max(float(bbox[1]) - float(bbox[3]) / 2, 0))
+	# y_max = int(h * min(float(bbox[1]) + float(bbox[3]) / 2, 1))
 
 	tl = line_thickness or round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1  # line/font thickness
 	color = color or [random.randint(0, 255) for _ in range(3)]

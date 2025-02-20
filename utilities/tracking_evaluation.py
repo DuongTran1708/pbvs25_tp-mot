@@ -60,6 +60,9 @@ def print_metrics_ext(seq, file_re_ou, header, metrics, extra_info, banner=30):
 		for (start, end) in splits]))
 	print('\n\n')
 
+	# DEBUG:
+	print([metrics[start:end] for (start, end) in splits])
+
 	with open(file_re_ou, "a") as f_write:
 		f_write.write(f"\n\n--Evaluate {seq} -- \n")
 
@@ -564,11 +567,16 @@ def evaluate_sequence(trackDB, gtDB, distractor_ids=np.ndarray([]), iou_thres=0.
 # endregion
 
 
-def evaluate_tracking():
+def evaluate_tracking(args):
 	# Init file
-	folder_lbl_gt_in = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/"  # ground truth
-	folder_lbl_tr_in = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/"  # tracking result
-	folder_re_ou     = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/"  # result folder
+	# folder_lbl_gt_in = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/"  # ground truth
+	# folder_lbl_tr_in = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/"  # tracking result
+	# folder_re_ou     = "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/"  # result folder
+
+	folder_lbl_gt_in = args.gt_folder  # ground truth
+	folder_lbl_tr_in = args.mot_folder  # tracking result
+	folder_re_ou     = args.ou_folder  # result folder
+
 
 	# create output file
 	file_re_ou  = os.path.join(folder_re_ou, f'thermal_tracking_evaluation_result.txt')
@@ -597,9 +605,16 @@ def evaluate_tracking():
 
 
 if __name__ == '__main__':
-	# parser = argparse.ArgumentParser(description='MTMC Evaluation')
-	# parser.add_argument('--re', help='Tracking result', type=str)
-	# parser.add_argument('--gt', help='Ground-truth annotation', type=str)
-	# parser.add_argument('--ou', help='Evaluation result', type=str)
-	# args = parser.parse_args()
-	evaluate_tracking()
+	parser = argparse.ArgumentParser(description='Object detection evaluation bases on COCO format')
+	parser.add_argument('--gt_folder', help='Folder of Ground-truth annotation', type=str,
+	                    default="/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/"
+	                    )
+	parser.add_argument('--mot_folder', help='Folder of Detection result', type=str,
+	                    default="/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/"
+	                    )
+	parser.add_argument('--ou_folder', help='Folder of Output Evaluation result', type=str,
+	                    default="/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/result/"
+	                    )
+	args = parser.parse_args()
+
+	evaluate_tracking(args)

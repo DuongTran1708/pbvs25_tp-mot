@@ -76,7 +76,7 @@ class Instance:
 		self.label       = class_label
 
 		self.id          = id
-		self.bbox        = bbox
+		self.bbox        = bbox  # [top_left_x, top_left_y, bottom_right_x, bottom_right_y]
 		self.polygon     = polygon
 		self.confidence  = confidence
 		self.class_label = class_label

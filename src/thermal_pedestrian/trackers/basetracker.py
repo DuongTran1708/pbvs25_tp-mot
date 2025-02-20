@@ -132,3 +132,11 @@ class BaseTracker(metaclass=abc.ABCMeta):
 		"""
 		error_console.log("``associate_detections_to_trackers()`` has not been implemented yet")
 		raise NotImplementedError
+
+	def clear_model_memory(self):
+		"""Free the memory of model
+
+		Returns:
+			None
+		"""
+		pass

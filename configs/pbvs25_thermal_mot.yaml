@@ -18,6 +18,9 @@ data:
   # Frame rate of the video.
   process_num: 3
   # Number of processes which runs in parallel
+  class_labels:
+    file: "configs/class_labels_1cls.json"
+    # Config file containing class_labels.
 
 data_loader:
   data: "images"
@@ -56,16 +59,13 @@ detector:
   # CUDDevice, i.e. 0 or 0,1,2,3 or cpu
   batch_size: *batch_size
   # Number of samples in one forward & backward pass.
-  folder_out: "yolov8s_1280"
+  folder_out: "yolov8s_1280_imgz_1280"
   # The output folder
-  class_labels:
-    file: "configs/class_labels_1cls.json"
-    # Config file containing class_labels.
   queue_size: 30
   # Number of slot in the queue to store the detection result
 
 tracker:
-  name: "sort_kalman_bbox"
+  name: "sort"
   # Name of the tracker.
   max_age: 10
   # Max number of frame keep the object before deleting.
@@ -74,6 +74,8 @@ tracker:
   # before the object is considered becoming the track.
   iou_threshold: 0.2
   # The Intersection over Union between two track with their bounding box.
+  folder_out: "sort"
+  # The output folder
 
 data_writer:
   output_dir: "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25"

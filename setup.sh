@@ -19,6 +19,7 @@ pip install torchmetrics==1.6.1  # PyTorch native Metrics
 pip install validators==0.34.0  # Python Data Validation for Humans
 pip install thop  # A tool to count the FLOPs of PyTorch model.
 pip install psutil==7.0.0  # Cross-platform lib for process and system monitoring in Python.
+pip install filterpy==1.4.5  # Kalman filtering and optimal estimation library
 
 # In stall the project in editable mode.
 rm -rf poetry.lock
