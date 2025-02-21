@@ -63,7 +63,7 @@ class KalmanBBoxTrack(General_Moving_Object):
 		# Here we assume that the ``General_Moving_Object`` object has already been init().
 		# So ``self.current_bbox`` return the first bbox value.
 		self.kf.x[:4] = bbox_xyxy_to_z(self.current_bbox)
-	
+
 	@classmethod
 	def track_from_detection(cls, instance: Instance, **kwargs):
 		"""Create ``General_Moving_Object`` object from ``Instance`` object.

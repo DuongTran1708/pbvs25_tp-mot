@@ -316,7 +316,7 @@ class ThermalCamera(BaseCamera):
 		# load list images
 		list_imgs = [s for s in sorted(os.listdir(self.data_loader_cfg['data_path']))]
 
-		with open(file_mot_ou, 'w') as f_write:
+		with (open(file_mot_ou, 'w') as f_write):
 			# run tracking
 			for img_index, img_name in enumerate(tqdm(list_imgs, desc=f"Tracking: {self.data_writer_cfg['seq_cur']}")):
 				# init
@@ -350,8 +350,11 @@ class ThermalCamera(BaseCamera):
 									confidence   = float(random.randint(60, 90) / 100),
 									class_label  = self.class_labels.class_labels[0]
 								)
+
+					# filter detection
 					# if width and height equal 0
-					if instance.bbox[0] == instance.bbox[2] or instance.bbox[1] == instance.bbox[3]:
+					if (abs(int(instance.bbox[0] - instance.bbox[2])) < 2 or
+							abs(int(instance.bbox[1] - instance.bbox[3])) < 2):
 						continue
 
 					instances.append(instance)
@@ -366,10 +369,10 @@ class ThermalCamera(BaseCamera):
 					bbox = bbox_xyxy_to_xywh(gmo.current_bbox)
 					str_out = (f"{img_index + 1},"  # because frame start from 1, PBVS rule
 								f"{gmo.id},"  
-								f"{bbox[0]},"
-								f"{bbox[1]},"
-								f"{bbox[2]},"
-								f"{bbox[3]},"
+								f"{abs(bbox[0])},"
+								f"{abs(bbox[1])},"
+								f"{abs(bbox[2])},"
+								f"{abs(bbox[3])},"
 								f"{gmo.confidence:.3f},"
 								f"{gmo.current_label['id']},"
 								f"-1,-1\n")
