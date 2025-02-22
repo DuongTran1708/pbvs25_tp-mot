@@ -21,6 +21,10 @@ pip install thop==0.1.1.post2209072238  # A tool to count the FLOPs of PyTorch m
 pip install psutil==7.0.0  # Cross-platform lib for process and system monitoring in Python.
 pip install filterpy==1.4.5  # Kalman filtering and optimal estimation library
 pip install gdown==5.2.0  # Google Drive Public File/Folder Downloader
+pip install tensorboard  # TensorFlow's Visualization Toolkit
+pip install yacs==0.1.8  # Yet Another Configuration System
+pip install termcolor==2.5.0  # ANSI color formatting for output in terminal
+pip install lap==0.5.12  # Linear Assignment Problem solver (LAPJV/LAPMOD).
 
 # In stall the project in editable mode.
 rm -rf poetry.lock

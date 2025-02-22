@@ -48,7 +48,7 @@ class SORT(BaseTracker):
 
 	# MARK: Update
 
-	def update(self, detections: List[Instance]):
+	def update(self, detections: List[Instance], *args, **kwargs):
 		"""Update ``self.tracks`` with new detections.
 
 		Args:

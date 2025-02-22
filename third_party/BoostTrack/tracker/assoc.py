@@ -7,7 +7,7 @@ import numpy as np
 
 
 def shape_similarity(detects: np.ndarray, tracks: np.ndarray) -> np.ndarray:
-    from default_settings import BoostTrackSettings
+    from BoostTrack.default_settings import BoostTrackSettings
     if not BoostTrackSettings['s_sim_corr']:
         return shape_similarity_v1(detects, tracks)
     else:
@@ -168,12 +168,12 @@ def associate(
         trackers,
         iou_threshold,
         mahalanobis_distance: Optional[np.ndarray] = None,
-        track_confidence: Optional[np.ndarray] = None,
+        track_confidence    : Optional[np.ndarray] = None,
         detection_confidence: Optional[np.ndarray] = None,
-        emb_cost: Optional[np.ndarray] = None,
-        lambda_iou: float = 0.5,
-        lambda_mhd: float = 0.25,
-        lambda_shape: float = 0.25
+        emb_cost            : Optional[np.ndarray] = None,
+        lambda_iou          : float                = 0.5,
+        lambda_mhd          : float                = 0.25,
+        lambda_shape        : float                = 0.25
 ):
     if len(trackers) == 0:
         return (

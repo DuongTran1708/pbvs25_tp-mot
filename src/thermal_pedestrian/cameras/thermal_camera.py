@@ -42,7 +42,7 @@ from thermal_pedestrian.configuration import (
 from thermal_pedestrian.cameras.base import BaseCamera
 from thermal_pedestrian.core.factory.builder import CAMERAS, DETECTORS, TRACKERS
 from thermal_pedestrian.core.data.class_label import ClassLabels
-from thermal_pedestrian.core.io.frame import FrameLoader
+from thermal_pedestrian.core.io.frame import FrameLoader, FrameWriter
 from thermal_pedestrian.core.io.video import VideoLoader
 from thermal_pedestrian.core.io.filedir import (
 	is_basename,
@@ -338,6 +338,7 @@ class ThermalCamera(BaseCamera):
 				for det in dets:
 					try:
 						instance = Instance(
+									video_name   = self.data_writer_cfg['seq_cur'],
 									frame_index  = img_index,
 									bbox         = np.asarray(covert_bbox_yolo_to_voc_format(det[1: 5], img)),
 									confidence   = det[5],
@@ -345,6 +346,7 @@ class ThermalCamera(BaseCamera):
 								)
 					except IndexError:
 						instance =Instance(
+									video_name   = self.data_writer_cfg['seq_cur'],
 									frame_index  = img_index,
 									bbox         = np.asarray(covert_bbox_yolo_to_voc_format(det[1: 5], img)),
 									confidence   = float(random.randint(60, 90) / 100),  # only for groundtruth, because it has no confident score
@@ -360,7 +362,7 @@ class ThermalCamera(BaseCamera):
 					instances.append(instance)
 
 				# tracking process
-				self.tracker.update(detections=instances)
+				self.tracker.update(detections=instances, image=img)
 				gmos = self.tracker.tracks
 
 				# write result
@@ -376,12 +378,6 @@ class ThermalCamera(BaseCamera):
 								f"{gmo.confidence:.3f},"
 								f"{gmo.current_label['id']},"
 								f"-1,-1\n")
-
-					# DEBUG:
-					# print("********")
-					# print(str_out)
-					# print("********")
-					# sys.exit()
 
 					f_write.write(str_out)
 

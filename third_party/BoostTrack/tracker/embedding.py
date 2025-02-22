@@ -9,7 +9,7 @@ import torchvision
 import torchreid
 import numpy as np
 
-from external.adaptors.fastreid_adaptor import FastReID
+from thermal_pedestrian.reidentifications.fastreid_adaptor import FastReID
 
 """
 Implementation from Deep OC-SORT:
@@ -192,7 +192,7 @@ class EmbeddingComputer:
         validation.
         """
         model = torchreid.models.build_model(name="osnet_ain_x1_0", num_classes=2510, loss="softmax", pretrained=False)
-        sd = torch.load("external/weights/osnet_ain_ms_d_c.pth.tar")["state_dict"]
+        sd = torch.load("models_zoo/pbvs25_tmot/fastreid/osnet_ain_ms_d_c.pth.tar")["state_dict"]
         new_state_dict = OrderedDict()
         for k, v in sd.items():
             name = k[7:]  # remove `module.`

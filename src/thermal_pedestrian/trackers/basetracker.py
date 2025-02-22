@@ -63,7 +63,7 @@ class BaseTracker(metaclass=abc.ABCMeta):
 	
 	# MARK: Update
 	
-	def update(self, detections: Any):
+	def update(self, detections: Any, *args, **kwargs):
 		"""Update ``self.tracks`` with new detections.
 		
 		Args:

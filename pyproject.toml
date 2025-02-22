@@ -28,7 +28,7 @@ classifiers = [
 packages = [
     {include = "thermal_pedestrian" , from = "src"},
     {include = "ultralytics"        , from = "third_party"},
-    {include = "fastreid"           , from = "third_party"},
+    {include = "fast_reid"          , from = "third_party"},
     {include = "torchreid"          , from = "third_party"},
     {include = "BoostTrack"         , from = "third_party"},
 ]
