@@ -65,7 +65,7 @@ detector:
   # Number of slot in the queue to store the detection result
 
 tracker:
-  name: "sort"
+  name: "boosttrack"
   # Name of the tracker.
   max_age: 1
   # Max number of frame keep the object before deleting.
@@ -74,8 +74,10 @@ tracker:
   # before the object is considered becoming the track.
   iou_threshold: 0.2
   # The Intersection over Union between two track with their bounding box.
-  folder_out: "sort"
+  folder_out: "boosttrack"
   # The output folder
+  weights: "models_zoo/pbvs25_tmot/pbvs25_tmot_1280/weights/best.pt"
+  # Pretrained weights file.
 
 data_writer:
   output_dir: "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25"

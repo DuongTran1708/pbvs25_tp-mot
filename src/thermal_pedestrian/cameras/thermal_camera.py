@@ -347,7 +347,7 @@ class ThermalCamera(BaseCamera):
 						instance =Instance(
 									frame_index  = img_index,
 									bbox         = np.asarray(covert_bbox_yolo_to_voc_format(det[1: 5], img)),
-									confidence   = float(random.randint(60, 90) / 100),
+									confidence   = float(random.randint(60, 90) / 100),  # only for groundtruth, because it has no confident score
 									class_label  = self.class_labels.class_labels[0]
 								)
 

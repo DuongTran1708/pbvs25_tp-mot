@@ -24,14 +24,14 @@ from thermal_pedestrian.detectors import BaseDetector
 from ultralytics.models.yolo import detect
 
 __all__ = [
-	"YOLOv8"
+	"YOLOv8_Adapter"
 ]
 
 
 # MARK: - YOLOv8
 
 @DETECTORS.register(name="yolov8")
-class YOLOv8(BaseDetector):
+class YOLOv8_Adapter(BaseDetector):
 
 	# MARK: Magic Functions
 

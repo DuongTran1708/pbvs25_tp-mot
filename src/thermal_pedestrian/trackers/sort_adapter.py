@@ -40,8 +40,10 @@ class SORT(BaseTracker):
 	"""
 	# MARK: Magic Functions
 
-	def __init__(self, **kwargs):
-		super().__init__(**kwargs)
+	def __init__(self,
+	             name: str = "sort",
+	             *args, **kwargs):
+		super().__init__(name=name, *args, **kwargs)
 		self.tracks: List[KalmanBBoxTrack] = []
 
 	# MARK: Update

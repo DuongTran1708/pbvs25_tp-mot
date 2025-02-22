@@ -17,9 +17,10 @@ pip install rich==13.9.4  # Rich is a Python library for rich text and beautiful
 pip install pynvml==12.0.0  # Python utilities for the NVIDIA Management Library
 pip install torchmetrics==1.6.1  # PyTorch native Metrics
 pip install validators==0.34.0  # Python Data Validation for Humans
-pip install thop  # A tool to count the FLOPs of PyTorch model.
+pip install thop==0.1.1.post2209072238  # A tool to count the FLOPs of PyTorch model.
 pip install psutil==7.0.0  # Cross-platform lib for process and system monitoring in Python.
 pip install filterpy==1.4.5  # Kalman filtering and optimal estimation library
+pip install gdown==5.2.0  # Google Drive Public File/Folder Downloader
 
 # In stall the project in editable mode.
 rm -rf poetry.lock
