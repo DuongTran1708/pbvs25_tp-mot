@@ -608,7 +608,7 @@ def evaluate_tracking(args):
 	# calculate avarage
 	metrics_seqs = np.array(metrics_seqs)
 	metrics      = np.mean(metrics_seqs, axis=0)
-	print_metrics_ext(seq, file_re_ou, f' Evaluation avarage', metrics, extra_info)
+	print_metrics_ext("average", file_re_ou, f' Evaluation average', metrics, extra_info)
 
 
 if __name__ == '__main__':

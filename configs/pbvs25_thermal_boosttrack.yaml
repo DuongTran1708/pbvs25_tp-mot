@@ -74,22 +74,15 @@ tracker:
   # before the object is considered becoming the track.
   iou_threshold: 0.2
   # The Intersection over Union between two track with their bounding box.
-
+  min_confidence_det: 0.2
+  # Detection confidence threshold. Disregard all detections that have a
+  # confidence lower than this value.
   folder_out: "boosttrack"
   # The output folder
   weights: "models_zoo/pbvs25_tmot/pbvs25_tmot_1280/weights/best.pt"
   # Pretrained weights file.
   is_reload_model: True
   # Does the tracking model need to be reset after running 1 sequence
-  eval_expname: mot_ddm_1000_deeper
-  high_thres: 0.6
-  low_thres: 0.1
-  w_assoc_emb: 2.2
-  aw_param: 1.7
-  preprocess_workers: 16
-  min_confidence_det: 0.2
-  # Detection confidence threshold. Disregard all detections that have a
-  # confidence lower than this value.
 
 data_writer:
   output_dir: "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25"

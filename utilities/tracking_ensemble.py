@@ -117,17 +117,8 @@ def ensemble(tracks, iou_s, iou_t, merge_mode='mean'):
 	tracks     = tracks[np.argsort(tracks[:, 0])]  # sort by frame index
 	tracks_res = np.empty((0, 10))
 
-	# DEBUG:
-	# print(ids)
-
 	ids        = sorted(ids, key=lambda x: len(tracks[tracks[:, 1] == x]), reverse=True)
 	ids_used   = []
-
-	# DEBUG:
-	# print(tracks)
-	# print(tracks.shape)
-	# print(ids)
-	# sys.exit()
 
 	for index, id1 in enumerate(ids):
 
@@ -180,15 +171,10 @@ def main():
 		# load the first mot result
 		preds     = np.loadtxt(file_mot_in, delimiter=',')
 
-		# DEBUG:
-		# print(preds)
-		# print(preds.shape)
-		# sys.exit()
-
 		# load the rest mot results
 		# '{frame},{id},{x1},{y1},{w},{h},{s},{label},-1,-1\n'
 		for method in methods[1:]:
-			file_mot_in       = join(folder_mot_in, method, seq, 'thermal', f'{seq}_thermal.txt')
+			file_mot_in   = join(folder_mot_in, method, seq, 'thermal', f'{seq}_thermal.txt')
 			preds_        = np.loadtxt(file_mot_in, delimiter=',')
 			max_id        = np.max(preds[:, 1])
 			preds_[:, 1] += max_id + 1
