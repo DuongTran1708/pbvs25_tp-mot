@@ -39,10 +39,11 @@ def filter_targets(online_targets, aspect_ratio_thresh, min_box_area):
         tid = t[4]
         tc = t[5]
         vertical = tlwh[2] / tlwh[3] > aspect_ratio_thresh
-        if tlwh[2] * tlwh[3] > min_box_area and not vertical:
-            online_tlwhs.append(tlwh)
-            online_ids.append(tid)
-            online_conf.append(tc)
+        # if tlwh[2] * tlwh[3] < min_box_area and vertical:
+        #     continue
+        online_tlwhs.append(tlwh)
+        online_ids.append(tid)
+        online_conf.append(tc)
     return online_tlwhs, online_ids, online_conf
 
 

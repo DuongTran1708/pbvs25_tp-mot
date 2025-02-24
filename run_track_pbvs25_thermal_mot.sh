@@ -26,7 +26,7 @@ echo "###########################"
 #    --detection  \
 #    --run_image  \
 #    --drawing  \
-#    --config $DIR_TSS"/configs/pbvs25_thermal_mot.yaml"
+#    --config $DIR_TSS"/configs/pbvs25_thermal_mot_sort.yaml"
 
 # NOTE: DETECTION EVALUATION
 #echo "********************"
@@ -35,8 +35,8 @@ echo "###########################"
 #python utilities/detection_evaluation.py  \
 #  --img_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/images/val/  \
 #  --gt_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/  \
-#  --det_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/detection/yolov8s_1280_imgz_1280/  \
-#  --ou_file /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/detection/yolov8s_1280_imgz_1280/object_detection_result.txt  \
+#  --det_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/detection/yolov8s_1600_imgz_1600/  \
+#  --ou_file /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/detection/yolov8s_1600_imgz_1600/object_detection_result.txt  \
 
 # NOTE: TRACKING PROCESS
 echo "****************"
@@ -45,16 +45,17 @@ echo "****************"
 python main.py  \
     --tracking  \
     --run_image  \
-    --config $DIR_TSS"/configs/pbvs25_thermal_mot.yaml"
+    --drawing  \
+    --config $DIR_TSS"/configs/pbvs25_thermal_mot_sort.yaml"
 
 # NOTE: TRACKING EVALUATION
-#echo "******************"
-#echo "TRACKING EVALUATION"
-#echo "******************"
-#python utilities/tracking_evaluation.py  \
-#  --gt_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/  \
-#  --mot_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/sort/  \
-#  --ou_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/sort/  \
+echo "******************"
+echo "TRACKING EVALUATION"
+echo "******************"
+python utilities/tracking_evaluation.py  \
+  --gt_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/  \
+  --mot_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/sort/  \
+  --ou_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/sort/  \
 
 echo "###########################"
 echo "ENDING"

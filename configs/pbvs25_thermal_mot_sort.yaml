@@ -46,9 +46,9 @@ detector:
     # YOLOv5 variances.
     nc: 80
     # Number of classes.
-  weights: "models_zoo/pbvs25_tmot/pbvs25_tmot_1280/weights/best.pt"
+  weights: "models_zoo/pbvs25_tmot/pbvs25_tmot_v1_16002/weights/best.pt"
   # Pretrained weights file.
-  shape: [1280, 1280, 3]
+  shape: [1600, 1600, 3]
   # Input size as [C, H, W].
   min_confidence: 0.0001
   # Detection confidence threshold. Disregard all detections that have a
@@ -59,7 +59,7 @@ detector:
   # CUDDevice, i.e. 0 or 0,1,2,3 or cpu
   batch_size: *batch_size
   # Number of samples in one forward & backward pass.
-  folder_out: "yolov8s_1280_imgz_1280"
+  folder_out: "yolov8s_1600_imgz_1600"
   # The output folder
   queue_size: 30
   # Number of slot in the queue to store the detection result
@@ -67,15 +67,20 @@ detector:
 tracker:
   name: "sort"
   # Name of the tracker.
-  max_age: 10
+  max_age: 15
   # Max number of frame keep the object before deleting.
   min_hit: 3
     # The number of frame which has matching bounding box of the detected object
   # before the object is considered becoming the track.
-  iou_threshold: 0.2
+  iou_threshold: 0.15
   # The Intersection over Union between two track with their bounding box.
+  min_confidence_det: 0.2
+  # Detection confidence threshold. Disregard all detections that have a
+  # confidence lower than this value.
   folder_out: "sort"
   # The output folder
+  is_reload_model: False
+  # Does the tracking model need to be reset after running 1 sequence
 
 data_writer:
   output_dir: "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25"

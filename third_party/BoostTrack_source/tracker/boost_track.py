@@ -10,11 +10,11 @@ from typing import Optional, List
 import cv2
 import numpy as np
 
-from BoostTrack.default_settings import GeneralSettings, BoostTrackSettings, BoostTrackPlusPlusSettings
-from BoostTrack.tracker.embedding import EmbeddingComputer
-from BoostTrack.tracker.assoc import associate, iou_batch, MhDist_similarity, shape_similarity, soft_biou_batch
-from BoostTrack.tracker.ecc import ECC
-from BoostTrack.tracker.kalmanfilter import KalmanFilter
+from BoostTrack_source.default_settings import GeneralSettings, BoostTrackSettings, BoostTrackPlusPlusSettings
+from BoostTrack_source.tracker.embedding import EmbeddingComputer
+from BoostTrack_source.tracker.assoc import associate, iou_batch, MhDist_similarity, shape_similarity, soft_biou_batch
+from BoostTrack_source.tracker.ecc import ECC
+from BoostTrack_source.tracker.kalmanfilter import KalmanFilter
 
 
 __all__ = [

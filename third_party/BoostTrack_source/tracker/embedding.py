@@ -165,16 +165,16 @@ class EmbeddingComputer:
     def initialize_model(self):
         if self.dataset == "mot17":
             if self.test_dataset:
-                path = "external/weights/mot17_sbs_S50.pth"
+                path = "models_zoo/pbvs25_tmot/fastreid/mot17_sbs_S50.pth"
             else:
                 return self._get_general_model()
         elif self.dataset == "mot20":
             if self.test_dataset:
-                path = "external/weights/mot20_sbs_S50.pth"
+                path = "models_zoo/pbvs25_tmot/fastreid/mot20_sbs_S50.pth"
             else:
                 return self._get_general_model()
         elif self.dataset == "dance":
-            path = "external/weights/dance_sbs_S50.pth"
+            path = "models_zoo/pbvs25_tmot/fastreid/dance_sbs_S50.pth"
         else:
             raise RuntimeError("Need the path for a new ReID model.")
 
@@ -192,7 +192,7 @@ class EmbeddingComputer:
         validation.
         """
         model = torchreid.models.build_model(name="osnet_ain_x1_0", num_classes=2510, loss="softmax", pretrained=False)
-        sd = torch.load("models_zoo/pbvs25_tmot/fastreid/osnet_ain_ms_d_c.pth.tar")["state_dict"]
+        sd = torch.load("models_zoo/pbvs25_tmot/torchreid/osnet_ain_ms_d_c.pth.tar")["state_dict"]
         new_state_dict = OrderedDict()
         for k, v in sd.items():
             name = k[7:]  # remove `module.`

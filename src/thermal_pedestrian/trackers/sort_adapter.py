@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 import warnings
-from typing import Optional
+from typing import Optional, Union, List
 import numpy as np
 
 import torch
@@ -20,6 +20,7 @@ from torch import Tensor
 import torch
 
 from thermal_pedestrian.core.factory.builder import TRACKERS
+from thermal_pedestrian.core.objects.instance import Instance
 from thermal_pedestrian.trackers import BaseTracker
 from thermal_pedestrian.trackers.sort.sort_kalman_bbox import KalmanBBoxTrack
 from thermal_pedestrian.core.utils.bbox import batch_bbox_iou

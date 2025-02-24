@@ -19,12 +19,14 @@ import platform
 from torch import Tensor
 import torch
 
-from BoostTrack.default_settings import GeneralSettings
+from BoostTrack_source.default_settings import GeneralSettings
 from thermal_pedestrian.core.factory.builder import TRACKERS
+from thermal_pedestrian.core.objects.gmo import General_Moving_Object
 from thermal_pedestrian.core.objects.instance import Instance
 from thermal_pedestrian.core.utils.image import to_channel_first
 from thermal_pedestrian.trackers import BaseTracker
-from third_party.BoostTrack.tracker.boost_track import BoostTrack
+from BoostTrack_source.tracker.boost_track import BoostTrack
+from BoostTrack_source.utils import filter_targets
 
 __all__ = [
 	"BoostTrack_Adapter"
@@ -78,7 +80,25 @@ class BoostTrack_Adapter(BaseTracker):
 		img_tensor = torch.from_numpy(np.array([to_channel_first(image)])) # [H, W, C] -> [1, C, H, W]
 
 		targets = self.model.update(dets, img_tensor, image, tag)
-		# tlwhs, ids, confs = BoostTrack.utils.filter_targets(targets, GeneralSettings['aspect_ratio_thresh'], GeneralSettings['min_box_area'])
+		tlwhs, ids, confs = filter_targets(targets, GeneralSettings['aspect_ratio_thresh'], GeneralSettings['min_box_area'])
+
+		self.tracks = []
+		for tlwh, id, conf in zip(tlwhs, ids, confs):
+			gmo = General_Moving_Object.gmo_from_detection(Instance(
+				frame_index = detections[0].frame_index,
+				bbox        = np.array([tlwh[0], tlwh[1], tlwh[0] + tlwh[2], tlwh[1] + tlwh[3]]),
+				confidence  = conf,
+				class_label = detections[0].class_label
+			))
+			gmo.id = int(id)
+
+			# DEBUG:
+			# print("\n\n-----------------------------------------------")
+			# print(tlwh, id, conf)
+			# print(gmo.current_bbox, gmo.id, gmo.confidence)
+
+			self.tracks.append(gmo)
+
 
 	def update_matched_tracks(
 			self,
@@ -134,3 +154,13 @@ class BoostTrack_Adapter(BaseTracker):
 			3 lists of matches, unmatched_detections and unmatched_trackers
 		"""
 		pass
+
+	def clear_model_memory(self):
+		"""Free the memory of model
+
+		Returns:
+			None
+		"""
+		if self.model is not None:
+			del self.model
+			torch.cuda.empty_cache()

@@ -17,6 +17,7 @@
 # ==================================================================== #
 from __future__ import annotations
 
+import colorsys
 import itertools
 import json
 import os
@@ -27,6 +28,7 @@ import uuid
 import glob
 import copy
 import random
+import colorsys
 from queue import Queue
 from operator import itemgetter
 from timeit import default_timer as timer
@@ -257,8 +259,8 @@ class ThermalCamera(BaseCamera):
 					# process each detection
 					with open(file_path_txt_ou, 'w') as f_write:
 						for index_in, instance in enumerate(batch):
-							if instance.confidence < self.data_writer_cfg['min_confidence']:
-								continue
+							# if instance.confidence < self.data_writer_cfg['min_confidence']:
+							# 	continue
 							class_id   = instance.class_id
 							bbox_xyxyn = instance.bbox
 							score      = instance.confidence
@@ -266,7 +268,7 @@ class ThermalCamera(BaseCamera):
 
 							# DEBUG: draw
 							if self.drawing:
-								image_draw = plot_one_box(
+								image_draw = plot_one_box_yolo(
 									bbox = bbox_xyxyn,
 									img  = image_draw,
 									label= f"{instance.label.name}_{score:.2f}"
@@ -275,7 +277,6 @@ class ThermalCamera(BaseCamera):
 					# DEBUG: draw
 					if self.drawing:
 						cv2.imwrite(os.path.join(folder_img_ou, os.path.basename(file_path_img)), image_draw)
-
 
 				pbar.update(len(indexes))
 			pbar.close()
@@ -313,6 +314,15 @@ class ThermalCamera(BaseCamera):
 			)
 			os.makedirs(folder_img_ou, exist_ok=True)
 
+			folder_img_ou_ori_det = os.path.join(
+				self.data_writer_cfg['output_dir'],
+				"tracking",
+				self.tracker_cfg['folder_out'],
+				self.data_writer_cfg['seq_cur'],
+				"thermal/img_draw_ori"
+			)
+			os.makedirs(folder_img_ou_ori_det, exist_ok=True)
+
 		# load list images
 		list_imgs = [s for s in sorted(os.listdir(self.data_loader_cfg['data_path']))]
 
@@ -326,40 +336,51 @@ class ThermalCamera(BaseCamera):
 				# load image
 				img = cv2.imread(img_path)
 
+				# DEBUG: draw
+				if self.drawing:
+					image_draw         = img.copy()
+					image_draw_ori_det = img.copy()
+
 				# load yolo detection
 				# class_id, c_xn, c_yn, wn, hw, score
-				try:
-					dets = np.loadtxt(det_path, dtype=np.float32, delimiter=' ').reshape(-1, 6)
-				except ValueError:
-					dets = np.loadtxt(det_path, dtype=np.float32, delimiter=' ').reshape(-1, 5)  # only for groundtruth, because it has no confident score
+				# dets = np.loadtxt(det_path, dtype=np.float32, delimiter=' ').reshape(-1, 6)  # for detection has score
 
-				# create list of detections for feeding to tracker
 				instances = []
-				for det in dets:
-					try:
+				with open(det_path, "r") as f_read:
+					for line in f_read:
+						line   = line.strip().split(" ")
+						det    = [float(x) for x in line]
+						det[0] = int(det[0])
+						if len(det) == 5:  # class_id, c_xn, c_yn, wn, hw, and does not have score
+							det.append(float(random.randint(60, 90) / 100))   # random generate
+
+						if det[5] < self.tracker_cfg['min_confidence_det']:
+							continue
+
 						instance = Instance(
 									video_name   = self.data_writer_cfg['seq_cur'],
 									frame_index  = img_index,
 									bbox         = np.asarray(covert_bbox_yolo_to_voc_format(det[1: 5], img)),
 									confidence   = det[5],
-									class_label  = self.class_labels.class_labels[0]
-								)
-					except IndexError:
-						instance =Instance(
-									video_name   = self.data_writer_cfg['seq_cur'],
-									frame_index  = img_index,
-									bbox         = np.asarray(covert_bbox_yolo_to_voc_format(det[1: 5], img)),
-									confidence   = float(random.randint(60, 90) / 100),  # only for groundtruth, because it has no confident score
-									class_label  = self.class_labels.class_labels[0]
-								)
+									class_label  = self.class_labels.class_labels[det[0]]
+						)
 
-					# filter detection
-					# if width and height equal 0
-					if (abs(int(instance.bbox[0] - instance.bbox[2])) < 2 or
-							abs(int(instance.bbox[1] - instance.bbox[3])) < 2):
-						continue
+						# filter detection
+						# if width and height equal 0
+						# if (abs(int(instance.bbox[0] - instance.bbox[2])) < 2 or
+						# 		abs(int(instance.bbox[1] - instance.bbox[3])) < 2):
+						# 	continue
 
-					instances.append(instance)
+						instances.append(instance)
+
+					# DEBUG: draw
+					if self.drawing:
+						image_draw_ori_det = plot_one_box_voc(
+							bbox  = instance.bbox,
+							img   = image_draw_ori_det,
+							color = create_unique_color_uchar(instance.id % 1000),
+							label = f"{instance.id % 1000}_{instance.confidence:.2f}"
+						)
 
 				# tracking process
 				self.tracker.update(detections=instances, image=img)
@@ -368,6 +389,8 @@ class ThermalCamera(BaseCamera):
 				# write result
 				# '{frame},{id},{x1},{y1},{w},{h},{s},{label},-1,-1\n'
 				for gmo in gmos:
+					if gmo.time_since_update > 0:  # the track does not have any dets match
+						continue
 					bbox = bbox_xyxy_to_xywh(gmo.current_bbox)
 					str_out = (f"{img_index + 1},"  # because frame start from 1, PBVS rule
 								f"{gmo.id},"  
@@ -380,6 +403,21 @@ class ThermalCamera(BaseCamera):
 								f"-1,-1\n")
 
 					f_write.write(str_out)
+
+					# DEBUG: draw
+					if self.drawing:
+						image_draw = plot_one_box_voc(
+							bbox  = gmo.current_bbox,
+							img   = image_draw,
+							color = create_unique_color_uchar(gmo.id % 1000),
+							label = f"{gmo.id % 1000}_{gmo.confidence:.2f}"
+						)
+
+				# DEBUG: draw
+				if self.drawing:
+					cv2.imwrite(os.path.join(folder_img_ou, os.path.basename(img_path)), image_draw)
+					cv2.imwrite(os.path.join(folder_img_ou_ori_det, os.path.basename(img_path)), image_draw_ori_det)
+
 
 
 	def run_heuristic(self):
@@ -416,6 +454,10 @@ class ThermalCamera(BaseCamera):
 			# NOTE: Tracking process
 			if self.process["function_tracking"]:
 				if (not hasattr(self, "tracker")) or self.tracker is None:
+					self.init_tracker(tracker=self.tracker_cfg)
+				elif self.tracker_cfg['is_reload_model']:
+					self.tracker.clear_model_memory()
+					self.tracker = None
 					self.init_tracker(tracker=self.tracker_cfg)
 				self.run_tracker()
 
@@ -465,7 +507,7 @@ def covert_bbox_yolo_to_voc_format(bbox, img):
 	return x_min, y_min, x_max, y_max
 
 
-def plot_one_box(bbox, img, color=None, label=None, line_thickness=1):
+def plot_one_box_yolo(bbox, img, color=None, label=None, line_thickness=1):
 	"""Plots one bounding box on image img
 
 	Args:
@@ -497,3 +539,47 @@ def plot_one_box(bbox, img, color=None, label=None, line_thickness=1):
 		cv2.putText(img, label, (c1[0], c1[1] - 2), 0, tl / 3, [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
 
 	return img
+
+def plot_one_box_voc(bbox, img, color=None, label=None, line_thickness=1):
+	"""Plots one bounding box on image img
+
+	Args:
+		bbox: YOLO format
+		img: nparray, cv2 image
+		color:
+		label:
+		line_thickness:
+
+	Returns:
+
+	"""
+	x_min, y_min, x_max, y_max =  bbox
+	# h, w, _ = img.shape
+	# x_min = int(w * max(float(bbox[0]) - float(bbox[2]) / 2, 0))
+	# x_max = int(w * min(float(bbox[0]) + float(bbox[2]) / 2, 1))
+	# y_min = int(h * max(float(bbox[1]) - float(bbox[3]) / 2, 0))
+	# y_max = int(h * min(float(bbox[1]) + float(bbox[3]) / 2, 1))
+
+	tl = line_thickness or round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1  # line/font thickness
+	color = color or [random.randint(0, 255) for _ in range(3)]
+	c1, c2 = (int(x_min), int(y_min)), (int(x_max), int(y_max))
+	cv2.rectangle(img, c1, c2, color, thickness=tl, lineType=cv2.LINE_AA)
+	if label:
+		tf = max(tl - 1, 1)  # font thickness
+		t_size = cv2.getTextSize(label, 0, fontScale=tl / 3, thickness=tf)[0]
+		c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
+		cv2.rectangle(img, c1, c2, color, -1, cv2.LINE_AA)  # filled
+		cv2.putText(img, label, (c1[0], c1[1] - 2), 0, tl / 3, [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
+
+	return img
+
+
+def create_unique_color_float(tag, hue_step=0.41):
+	h, v = (tag * hue_step) % 1, 1. - (int(tag * hue_step) % 4) / 5.
+	r, g, b = colorsys.hsv_to_rgb(h, 1., v)
+	return r, g, b
+
+
+def create_unique_color_uchar(tag, hue_step=0.41):
+	r, g, b = create_unique_color_float(tag, hue_step)
+	return (int(255 * r), int(255 * g), int(255 * b))

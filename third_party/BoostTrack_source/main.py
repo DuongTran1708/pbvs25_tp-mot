@@ -105,6 +105,7 @@ def main():
         tlwhs, ids, confs = utils.filter_targets(targets, GeneralSettings['aspect_ratio_thresh'], GeneralSettings['min_box_area'])
 
         total_time += time.time() - start_time
+
         frame_count += 1
 
         results[video_name].append((frame_id, tlwhs, ids, confs))
