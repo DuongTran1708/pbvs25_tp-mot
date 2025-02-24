@@ -26,7 +26,7 @@ def write_results_no_score(filename, results):
                 f.write(line)
 
 
-def filter_targets(online_targets, aspect_ratio_thresh, min_box_area):
+def filter_targets(online_targets, aspect_ratio_thresh = None, min_box_area = None):
     """Removes targets not meeting threshold criteria.
 
     Returns (list of tlwh, list of ids).
@@ -38,9 +38,13 @@ def filter_targets(online_targets, aspect_ratio_thresh, min_box_area):
         tlwh = [t[0], t[1], t[2] - t[0], t[3] - t[1]]
         tid = t[4]
         tc = t[5]
-        vertical = tlwh[2] / tlwh[3] > aspect_ratio_thresh
-        # if tlwh[2] * tlwh[3] < min_box_area and vertical:
-        #     continue
+        if aspect_ratio_thresh is not None:
+            vertical = tlwh[2] / tlwh[3] > aspect_ratio_thresh
+            if vertical:
+                continue
+        if min_box_area is not None:
+            if tlwh[2] * tlwh[3] < min_box_area:
+                continue
         online_tlwhs.append(tlwh)
         online_ids.append(tid)
         online_conf.append(tc)

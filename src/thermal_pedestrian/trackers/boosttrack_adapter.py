@@ -80,7 +80,8 @@ class BoostTrack_Adapter(BaseTracker):
 		img_tensor = torch.from_numpy(np.array([to_channel_first(image)])) # [H, W, C] -> [1, C, H, W]
 
 		targets = self.model.update(dets, img_tensor, image, tag)
-		tlwhs, ids, confs = filter_targets(targets, GeneralSettings['aspect_ratio_thresh'], GeneralSettings['min_box_area'])
+		# tlwhs, ids, confs = filter_targets(targets, GeneralSettings['aspect_ratio_thresh'], GeneralSettings['min_box_area'])
+		tlwhs, ids, confs = filter_targets(targets)
 
 		self.tracks = []
 		for tlwh, id, conf in zip(tlwhs, ids, confs):
