@@ -46,6 +46,7 @@ class SORT(BaseTracker):
 	             *args, **kwargs):
 		super().__init__(name=name, *args, **kwargs)
 		self.tracks: List[KalmanBBoxTrack] = []
+		self.track_index                   = 0
 
 	# MARK: Update
 
@@ -132,7 +133,9 @@ class SORT(BaseTracker):
 				The newly detections.
 		"""
 		for i in unmatched_dets:
-			new_trk = KalmanBBoxTrack.track_from_detection(detections[i])
+			new_trk           = KalmanBBoxTrack.track_from_detection(detections[i])
+			self.track_index += 1
+			new_trk.id        = self.track_index
 			self.tracks.append(new_trk)
 
 	def delete_dead_tracks(self):

@@ -12,12 +12,15 @@ def tiou(track1, track2, iou_s):
 	fstart2, fstop2 = track2[0, 0], track2[-1, 0]
 	if fstop1 < fstart2 or fstop2 < fstart1: return 0.
 	len1, len2 = track1.shape[0], track2.shape[0]
+
 	assert len1 >= len2
+
 	frames1, frames2 = set(track1[:, 0]), set(track2[:, 0])
 	inter_frames = tuple(frames1.intersection(frames2))
 	inter_track1 = track1[np.isin(track1[:, 0], inter_frames)]
 	inter_track2 = track2[np.isin(track2[:, 0], inter_frames)]
 	assert np.all(inter_track1[:, 0] == inter_track2[:, 0])
+
 	'''Spatial-IoU'''
 	x1_1, y1_1 = inter_track1[:, 2], inter_track1[:, 3]
 	w1, h1 = inter_track1[:, 4], inter_track1[:, 5]
@@ -34,6 +37,7 @@ def tiou(track1, track2, iou_s):
 	h_  = np.maximum(0.  , y2_ - y1_)
 	inter_spatial = w_ * h_
 	iou_spatial = inter_spatial / (areas_1 + areas_2 - inter_spatial)
+
 	'''Temporal-IoU'''
 	inter_temporal = np.sum(iou_spatial > iou_s)
 	iou_temporal = inter_temporal / len2
@@ -110,24 +114,43 @@ def filter_by_length(tracks, thres):
 
 def ensemble(tracks, iou_s, iou_t, merge_mode='mean'):
 	ids        = set(tracks[:, 1])
-	tracks     = tracks[np.argsort(tracks[:, 0])]
+	tracks     = tracks[np.argsort(tracks[:, 0])]  # sort by frame index
 	tracks_res = np.empty((0, 10))
+
+	# DEBUG:
+	# print(ids)
+
 	ids        = sorted(ids, key=lambda x: len(tracks[tracks[:, 1] == x]), reverse=True)
 	ids_used   = []
-	for i, id1 in enumerate(ids):
-		if id1 in ids_used: continue
+
+	# DEBUG:
+	# print(tracks)
+	# print(tracks.shape)
+	# print(ids)
+	# sys.exit()
+
+	for index, id1 in enumerate(ids):
+
+		if id1 in ids_used:
+			continue
+
 		track1 = tracks[tracks[:, 1] == id1]
 		track2 = []
-		for j, id2 in enumerate(ids[i + 1:], start=i + 1):
-			if id2 in ids_used: continue
+		for j, id2 in enumerate(ids[index + 1:], start=index + 1):
+			if id2 in ids_used:
+				continue
+
 			track2_ = tracks[tracks[:, 1] == id2]
-			tiou_ = tiou(track1, track2_, iou_s)
+			tiou_   = tiou(track1, track2_, iou_s)
+
 			if tiou_ > iou_t:
 				track2.append(track2_)
 				ids_used.append(id2)
+
 		if track2:
 			for track2_ in track2:
 				track1 = merge_ID(track1, track2_, merge_mode)
+
 		tracks_res = np.concatenate([tracks_res, track1], axis=0)
 	return tracks_res
 
@@ -138,7 +161,7 @@ def main():
 	seqs = ["seq2", "seq17", "seq22", "seq47", "seq54", "seq66"]
 	methods = [
 		'sort',
-		'boosttrack',
+		'boosttrack'
 	]
 
 	# create folder out
@@ -148,17 +171,26 @@ def main():
 	merge_mode = 'track1'
 	for seq in tqdm(seqs):
 		print(f'Processing video {seq}...')
-		path_save = join(folder_en_out, f'{seq}_thermal.txt')
-		path_in   = join(folder_mot_in, methods[0], seq, 'thermal', f'{seq}_thermal.txt')
+		file_mot_en_ou = join(folder_en_out, seq, 'thermal', f'{seq}_thermal.txt')
+		file_mot_in    = join(folder_mot_in, methods[0], seq, 'thermal', f'{seq}_thermal.txt')
+
+		# create folder
+		os.makedirs(os.path.dirname(file_mot_en_ou), exist_ok=True)
 
 		# load the first mot result
-		preds     = np.loadtxt(path_in, delimiter=',')
+		preds     = np.loadtxt(file_mot_in, delimiter=',')
+
+		# DEBUG:
+		# print(preds)
+		# print(preds.shape)
+		# sys.exit()
 
 		# load the rest mot results
+		# '{frame},{id},{x1},{y1},{w},{h},{s},{label},-1,-1\n'
 		for method in methods[1:]:
-			path_in  = join(folder_mot_in, method, seq, 'thermal', f'{seq}_thermal.txt')
-			preds_   = np.loadtxt(path_in, delimiter=',')
-			max_id   = np.max(preds[:, 1])
+			file_mot_in       = join(folder_mot_in, method, seq, 'thermal', f'{seq}_thermal.txt')
+			preds_        = np.loadtxt(file_mot_in, delimiter=',')
+			max_id        = np.max(preds[:, 1])
 			preds_[:, 1] += max_id + 1
 			preds = np.concatenate([preds, preds_], axis=0)
 
@@ -168,7 +200,7 @@ def main():
 		preds = filter_by_length(preds, thres=20)
 
 		# write out
-		np.savetxt(path_save, preds, fmt='%d,%d,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d')
+		np.savetxt(file_mot_en_ou, preds, fmt='%d,%d,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d')
 
 
 if __name__ == '__main__':

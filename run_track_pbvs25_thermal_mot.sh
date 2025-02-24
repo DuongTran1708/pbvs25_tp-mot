@@ -39,23 +39,29 @@ echo "###########################"
 #  --ou_file /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/detection/yolov8s_1600_imgz_1600/object_detection_result.txt  \
 
 # NOTE: TRACKING PROCESS
-echo "****************"
-echo "TRACKING PROCESS"
-echo "****************"
-python main.py  \
-    --tracking  \
-    --run_image  \
-    --drawing  \
-    --config $DIR_TSS"/configs/pbvs25_thermal_mot.yaml"
+#echo "****************"
+#echo "TRACKING PROCESS"
+#echo "****************"
+#python main.py  \
+#    --tracking  \
+#    --run_image  \
+#    --drawing  \
+#    --config $DIR_TSS"/configs/pbvs25_thermal_mot.yaml"
 
 # NOTE: TRACKING EVALUATION
-echo "******************"
-echo "TRACKING EVALUATION"
-echo "******************"
+#echo "******************"
+#echo "TRACKING EVALUATION"
+#echo "******************"
+#python utilities/tracking_evaluation.py  \
+#  --gt_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/  \
+#  --mot_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/boosttrack/  \
+#  --ou_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/boosttrack/  \
+
 python utilities/tracking_evaluation.py  \
   --gt_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/  \
-  --mot_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/boosttrack/  \
-  --ou_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/boosttrack/  \
+  --mot_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/ensemble/sort_boosttrack/  \
+  --ou_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/ensemble/sort_boosttrack/  \
+
 
 echo "###########################"
 echo "ENDING"
