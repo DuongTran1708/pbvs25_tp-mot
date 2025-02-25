@@ -373,14 +373,14 @@ class ThermalCamera(BaseCamera):
 
 						instances.append(instance)
 
-					# DEBUG: draw
-					if self.drawing:
-						image_draw_ori_det = plot_one_box_voc(
-							bbox  = instance.bbox,
-							img   = image_draw_ori_det,
-							color = create_unique_color_uchar(instance.id % 1000),
-							label = f"{instance.id % 1000}_{instance.confidence:.2f}"
-						)
+						# DEBUG: draw
+						if self.drawing:
+							image_draw_ori_det = plot_one_box_voc(
+								bbox  = instance.bbox,
+								img   = image_draw_ori_det,
+								color = create_unique_color_uchar(instance.id % 1000),
+								label = f"{instance.id % 1000}_{instance.confidence:.2f}"
+							)
 
 				# tracking process
 				self.tracker.update(detections=instances, image=img)
@@ -392,6 +392,7 @@ class ThermalCamera(BaseCamera):
 					if gmo.time_since_update > 0:  # the track does not have any dets match
 						continue
 					bbox = bbox_xyxy_to_xywh(gmo.current_bbox)
+
 					str_out = (f"{img_index + 1},"  # because frame start from 1, PBVS rule
 								f"{gmo.id},"  
 								f"{abs(bbox[0])},"

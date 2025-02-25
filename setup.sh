@@ -25,6 +25,9 @@ pip install tensorboard  # TensorFlow's Visualization Toolkit
 pip install yacs==0.1.8  # Yet Another Configuration System
 pip install termcolor==2.5.0  # ANSI color formatting for output in terminal
 pip install lap==0.5.12  # Linear Assignment Problem solver (LAPJV/LAPMOD).
+pip install cython-bbox==0.1.5  # Standalone cython_bbox
+pip install einops==0.8.1  # A new flavour of deep learning operations
+
 
 # In stall the project in editable mode.
 rm -rf poetry.lock

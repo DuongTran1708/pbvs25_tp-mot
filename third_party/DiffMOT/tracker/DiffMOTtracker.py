@@ -8,13 +8,13 @@ import cv2
 import numpy as np
 import torch
 import torch.nn.functional as F
-from models import *
+from DiffMOT.models import *
 
-from tracking_utils.kalman_filter import KalmanFilter
-from tracking_utils.log import logger
-from tracking_utils.utils import *
+from DiffMOT.tracking_utils.kalman_filter import KalmanFilter
+from DiffMOT.tracking_utils.log import logger
+from DiffMOT.tracking_utils.utils import *
 
-from tracker import matching
+from DiffMOT.tracker import matching
 
 from .basetrack import BaseTrack, TrackState
 
@@ -35,15 +35,15 @@ class STrack(BaseTrack):
         self.conds = deque([], maxlen=5)
 
 
-        self._tlwh = np.asarray(tlwh, dtype=np.float)
+        self._tlwh         = np.asarray(tlwh, dtype=np.float64)
         self.kalman_filter = None
         self.mean, self.covariance = None, None
         self.is_activated = False
 
-        self.score = score
+        self.score        = score
         self.tracklet_len = 0
 
-        self.emb = temp_feat
+        self.emb      = temp_feat
         self.features = deque([], maxlen=buffer_size)
 
     def update_features(self, feat, alpha=0.95):
@@ -235,7 +235,7 @@ class diffmottracker(object):
     def __init__(self, config, frame_rate=30):
         self.config = config
         self.tracked_stracks = []  # type: list[STrack]
-        self.lost_stracks = []  # type: list[STrack]
+        self.lost_stracks    = []  # type: list[STrack]
         self.removed_stracks = []  # type: list[STrack]
 
         self.frame_id = 0
@@ -248,7 +248,7 @@ class diffmottracker(object):
         self.std = np.array([0.289, 0.274, 0.278], dtype=np.float32).reshape(1, 1, 3)
 
         # self.kalman_filter = KalmanFilter()
-        self.embedder = EmbeddingComputer(self.config, 'dancetrack', False, True)
+        self.embedder = EmbeddingComputer(self.config, 'mot17', False, True)
         self.alpha_fixed_emb = 0.95
 
 

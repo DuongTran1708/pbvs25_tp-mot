@@ -12,3 +12,4 @@ from __future__ import annotations
 from .basetracker import BaseTracker
 from .sort_adapter import *
 from .boosttrack_adapter import *
+from .diffmot_adapter import *

@@ -9,7 +9,7 @@ import torchvision
 import torchreid
 import numpy as np
 
-from external.adaptors.fastreid_adaptor import FastReID
+from thermal_pedestrian.reidentifications.fastreid_adaptor import FastReID
 
 
 class EmbeddingComputer:
@@ -44,7 +44,7 @@ class EmbeddingComputer:
             h, w = image.shape[2:]
 
         bbox = np.array(bbox)
-        bbox = bbox.astype(np.int)
+        bbox = bbox.astype(np.int32)
         if bbox[0] < 0 or bbox[1] < 0 or bbox[2] > w or bbox[3] > h:
             # Faulty Patch Correction
             bbox[0] = np.clip(bbox[0], 0, None)
@@ -165,16 +165,16 @@ class EmbeddingComputer:
     def initialize_model(self):
         if self.dataset == "mot17":
             if self.test_dataset:
-                path = "external/weights/mot17_sbs_S50.pth"
+                path = "models_zoo/pbvs25_tmot/fastreid/mot17_sbs_S50.pth"
             else:
                 return self._get_general_model()
         elif self.dataset == "mot20":
             if self.test_dataset:
-                path = "external/weights/mot20_sbs_S50.pth"
+                path = "models_zoo/pbvs25_tmot/fastreid/mot20_sbs_S50.pth"
             else:
                 return self._get_general_model()
         elif self.dataset == "dance":
-            path = "external/weights/dance_sbs_S50.pth"
+            path = "models_zoo/pbvs25_tmot/fastreid/dance_sbs_S50.pth"
             # path = "/home/estar/lwy/DiffMOT/external/weights/dancetrack_sbs_S50_hybtid.pth"
         elif self.dataset == "sports":
             path = "/home/estar/lwy/BoT-SORT-main/fast_reid/tools/logs/SportsMOT/sbs_S50/model_0058.pth"
@@ -195,7 +195,7 @@ class EmbeddingComputer:
         validation.
         """
         model = torchreid.models.build_model(name="osnet_ain_x1_0", num_classes=2510, loss="softmax", pretrained=False)
-        sd = torch.load("external/weights/osnet_ain_ms_d_c.pth.tar")["state_dict"]
+        sd = torch.load("models_zoo/pbvs25_tmot/torchreid/osnet_ain_ms_d_c.pth.tar")["state_dict"]
         new_state_dict = OrderedDict()
         for k, v in sd.items():
             name = k[7:]  # remove `module.`

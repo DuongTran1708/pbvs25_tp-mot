@@ -32,6 +32,7 @@ packages = [
     {include = "torchreid"          , from = "third_party"},
     {include = "BoostTrack_source"  , from = "third_party"},
     {include = "DiffMOT"            , from = "third_party"},
+    {include = "ByteTrack"          , from = "third_party"},
 ]
 include = [
     "LICENSE",
