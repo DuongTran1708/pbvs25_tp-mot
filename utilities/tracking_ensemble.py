@@ -155,8 +155,8 @@ def main():
 		'sort_backward',
 		'boosttrack',
 		'boosttrack_backward',
-		'bytetrack',
-		'bytetrack_backward'
+		'botsort',
+		'botsort_backward',
 	]
 
 	# create folder out
@@ -191,6 +191,13 @@ def main():
 
 		# write out
 		np.savetxt(file_mot_en_ou, preds, fmt='%d,%d,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d')
+
+	# Run evaluation
+	os.system(f"python utilities/tracking_evaluation.py  \
+				  --gt_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/  \
+				  --mot_folder {folder_en_out}  \
+				  --ou_folder {folder_en_out}  \
+				")
 
 
 if __name__ == '__main__':

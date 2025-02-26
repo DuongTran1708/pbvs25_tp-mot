@@ -14,3 +14,4 @@ from .sort_adapter import *
 from .boosttrack_adapter import *
 from .diffmot_adapter import *
 from .bytetrack_adapter import *
+from .botsort_adapter import *

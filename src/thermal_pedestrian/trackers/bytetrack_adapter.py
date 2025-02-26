@@ -31,9 +31,6 @@ __all__ = [
 	"ByteTrack_Adapter"
 ]
 
-
-
-
 # MARK: - ByteTrack
 
 @TRACKERS.register(name="bytetrack")

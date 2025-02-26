@@ -601,6 +601,7 @@ class ThermalCamera(BaseCamera):
 					self.tracker = None
 					self.init_tracker(tracker=self.tracker_cfg)
 				self.run_tracker_forward()
+
 				if self.tracker_cfg['is_reload_model']:
 					self.tracker.clear_model_memory()
 					self.tracker = None

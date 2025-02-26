@@ -84,9 +84,9 @@ tracker:
   is_reload_model: False
   # Does the tracking model need to be reset after running 1 sequence
   bytetrack_config:
-    track_high_thresh: 0.25 # threshold for the first association
+    track_high_thresh: 0.5 # threshold for the first association
     track_low_thresh: 0.1 # threshold for the second association
-    new_track_thresh: 0.25 # threshold for init new track if the detection does not match any tracks
+    new_track_thresh: 0.2 # threshold for init new track if the detection does not match any tracks
     track_buffer: 30 # buffer to calculate the time when to remove tracks
     match_thresh: 0.8 # threshold for matching tracks
     fuse_score: True # Whether to fuse confidence scores with the iou distances before matching
@@ -97,7 +97,7 @@ tracker:
     # ReID model related thresh (not supported yet)
     proximity_thresh: 0.5
     appearance_thresh: 0.25
-    with_reid: False
+    with_reid: True
 
 
 data_writer:

@@ -25,20 +25,18 @@ from thermal_pedestrian.core.objects.instance import Instance
 from thermal_pedestrian.core.utils.image import to_channel_first
 from thermal_pedestrian.trackers import BaseTracker
 
-from thermal_pedestrian.trackers.bytetrack.byte_tracker import BYTETracker
-
 __all__ = [
-	"ByteTrack_Adapter"
+	"BOTSORT_Adapter"
 ]
 
+from ultralytics.trackers import BOTSORT
 
 
+# MARK: - BOTSORT_Adapter
 
-# MARK: - ByteTrack
-
-@TRACKERS.register(name="bytetrack")
-class ByteTrack_Adapter(BaseTracker):
-	"""ByteTrack
+@TRACKERS.register(name="botsort")
+class BOTSORT_Adapter(BaseTracker):
+	"""BOTSORT
 
 	Attributes:
 		Same as ``Tracker``
@@ -54,7 +52,7 @@ class ByteTrack_Adapter(BaseTracker):
 
 	def init_model(self):
 		"""Create and load model from weights."""
-		self.model = BYTETracker(self.bytetrack_config, frame_rate=30)
+		self.model = BOTSORT(self.bytetrack_config, frame_rate=30)
 
 	# MARK: Update
 

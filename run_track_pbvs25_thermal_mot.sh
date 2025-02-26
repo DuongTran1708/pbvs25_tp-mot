@@ -42,7 +42,8 @@ echo "###########################"
 echo "****************"
 echo "TRACKING PROCESS"
 echo "****************"
-yaml_files=(pbvs25_thermal_mot.yaml)
+#yaml_files=(pbvs25_thermal_mot_sort.yaml pbvs25_thermal_mot_boosttrack.yaml pbvs25_thermal_mot_diffmot.yaml pbvs25_thermal_mot_bytetrack.yaml pbvs25_thermal_mot_botsort.yaml)
+yaml_files=(pbvs25_thermal_mot_bytetrack.yaml)
 # shellcheck disable=SC2068
 for yaml_file in ${yaml_files[@]};
 do
@@ -50,7 +51,7 @@ do
         --tracking  \
         --run_image  \
         --config $DIR_TSS"/configs/"$yaml_file
-#        --drawing  \
+        #        --drawing  \
 done
 
 
@@ -58,6 +59,7 @@ done
 echo "******************"
 echo "TRACKING EVALUATION"
 echo "******************"
+#track_folder_results=(sort sort_backward boosttrack boosttrack_backward diffmot diffmot_backward bytetrack bytetrack_backward botsort botsort_backward)
 track_folder_results=(bytetrack bytetrack_backward)
 # shellcheck disable=SC2068
 for track_folder_result in ${track_folder_results[@]};
@@ -75,8 +77,8 @@ done
 # evaluate ensemble MOT
 #python utilities/tracking_evaluation.py  \
 #  --gt_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/  \
-#  --mot_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/ensemble/sort_sort_backward_boosttrack_boosttrack_backward_bytetrack_bytetrack_backward/  \
-#  --ou_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/ensemble/sort_sort_backward_boosttrack_boosttrack_backward_bytetrack_bytetrack_backward/  \
+#  --mot_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/ensemble/sort_sort_backward_boosttrack_boosttrack_backward_bytetrack_bytetrack_backward_botsort_botsort_backward/  \
+#  --ou_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/ensemble/sort_sort_backward_boosttrack_boosttrack_backward_bytetrack_bytetrack_backward_botsort_botsort_backward/  \
 
 
 echo "###########################"
