@@ -5,7 +5,6 @@ import sys
 import warnings
 from typing import Optional
 
-
 import torch
 import torch.nn as nn
 import os
@@ -16,43 +15,46 @@ from collections import OrderedDict
 import numpy as np
 import platform
 
+from munch import Munch
 from torch import Tensor
 import torch
 
-from BoostTrack_source.default_settings import GeneralSettings
 from thermal_pedestrian.core.factory.builder import TRACKERS
 from thermal_pedestrian.core.objects.gmo import General_Moving_Object
 from thermal_pedestrian.core.objects.instance import Instance
 from thermal_pedestrian.core.utils.image import to_channel_first
 from thermal_pedestrian.trackers import BaseTracker
-from BoostTrack_source.tracker.boost_track import BoostTrack
-from BoostTrack_source.utils import filter_targets
+
+from thermal_pedestrian.trackers.bytetrack.byte_tracker import BYTETracker
 
 __all__ = [
-	"BoostTrack_Adapter"
+	"ByteTrack_Adapter"
 ]
 
 
-# MARK: - BoostTrack
 
-@TRACKERS.register(name="boosttrack")
-class BoostTrack_Adapter(BaseTracker):
-	"""BoostTrack
+
+# MARK: - ByteTrack
+
+@TRACKERS.register(name="bytetrack")
+class ByteTrack_Adapter(BaseTracker):
+	"""ByteTrack
 
 	Attributes:
 		Same as ``Tracker``
 	"""
 	# MARK: Magic Functions
 
-	def __init__(self, **kwargs):
+	def __init__(self, bytetrack_config: dict, **kwargs):
 		super().__init__(**kwargs)
+		self.bytetrack_config = bytetrack_config
 		self.init_model()
 
 	# MARK: Configure
 
 	def init_model(self):
 		"""Create and load model from weights."""
-		self.model = BoostTrack()
+		self.model = BYTETracker(self.bytetrack_config, frame_rate=30)
 
 	# MARK: Update
 
@@ -69,35 +71,39 @@ class BoostTrack_Adapter(BaseTracker):
 		Returns:
 
 		"""
-		# dets: Nx5 of (x1, y1, x2, y2, ID)
-		dets = []
+		img_h, img_w, c = image.shape
+
+		# dets: Nx6 of (x1, y1, x2, y2, score)
+		dets = Munch()
+		dets.xywh  = []
+		dets.conf  = []
+		dets.cls   = []
 		for det in detections:
-			dets.append([float(det.bbox[0]), float(det.bbox[1]), float(det.bbox[2]), float(det.bbox[3]), det.class_label["id"]])
-		dets = np.array(dets)
+			dets.xywh.append(convert_voc_to_yolo((img_w, img_h), det.bbox))
+			dets.conf.append(det.confidence)
+			dets.cls.append(det.class_label['id'])
 
-		tag = f"{detections[0].video_name}:{detections[0].frame_index}"
+		dets.xywh = np.array(dets.xywh)
+		dets.conf = np.array(dets.conf)
+		dets.cls  = np.array(dets.cls)
 
-		img_tensor = torch.from_numpy(np.array([to_channel_first(image)])) # [H, W, C] -> [1, C, H, W]
+		# coords.tolist() + [self.track_id, self.score, self.cls, self.idx]
+		results   = self.model.update(dets)
 
-		targets = self.model.update(dets, img_tensor, image, tag)
-		# tlwhs, ids, confs = filter_targets(targets, GeneralSettings['aspect_ratio_thresh'], GeneralSettings['min_box_area'])
-		tlwhs, ids, confs = filter_targets(targets)
+		if len(results) == 0:
+			self.tracks = []
+			return
+
+		bboxes       = results[:,: 4].astype(float)
+		track_ids    = results[:, 4].astype(int)
+		confs        = results[:, 5].astype(int)
+		clsss        = results[:, 6].astype(int)
+		indexes_bbox = results[:, 7].astype(int)
 
 		self.tracks = []
-		for tlwh, id, conf in zip(tlwhs, ids, confs):
-			gmo = General_Moving_Object.gmo_from_detection(Instance(
-				frame_index = detections[0].frame_index,
-				bbox        = np.array([tlwh[0], tlwh[1], tlwh[0] + tlwh[2], tlwh[1] + tlwh[3]]),
-				confidence  = conf,
-				class_label = detections[0].class_label
-			))
-			gmo.id = int(id)
-
-			# DEBUG:
-			# print("\n\n-----------------------------------------------")
-			# print(tlwh, id, conf)
-			# print(gmo.current_bbox, gmo.id, gmo.confidence)
-
+		for track_id, idx in zip(track_ids, indexes_bbox):
+			gmo  = General_Moving_Object.gmo_from_detection(detections[idx])
+			gmo.id = int(track_id)
 			self.tracks.append(gmo)
 
 
@@ -165,3 +171,17 @@ class BoostTrack_Adapter(BaseTracker):
 		if self.model is not None:
 			del self.model
 			torch.cuda.empty_cache()
+
+
+def convert_voc_to_yolo(size, bbox):
+	dw = 1. / (float(size[0]))
+	dh = 1. / (float(size[1]))
+	x = (float(bbox[0]) + float(bbox[2])) / 2.0 - 1
+	y = (float(bbox[1]) + float(bbox[3])) / 2.0 - 1
+	w = abs(float(bbox[2]) - float(bbox[0]))
+	h = abs(float(bbox[3]) - float(bbox[1]))
+	x = x * dw
+	w = w * dw
+	y = y * dh
+	h = h * dh
+	return x, y, w, h

@@ -152,7 +152,11 @@ def main():
 	seqs = ["seq2", "seq17", "seq22", "seq47", "seq54", "seq66"]
 	methods = [
 		'sort',
-		'boosttrack'
+		'sort_backward',
+		'boosttrack',
+		'boosttrack_backward',
+		'bytetrack',
+		'bytetrack_backward'
 	]
 
 	# create folder out

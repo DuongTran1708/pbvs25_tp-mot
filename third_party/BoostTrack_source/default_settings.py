@@ -26,7 +26,7 @@ class GeneralSettings:
         'max_age': 30,
         'min_hits': 3,
         'det_thresh': 0.5,
-        'iou_threshold': 0.3,
+        'iou_threshold': 0.01,
         'use_ecc': True,
         'use_embedding': True,
         'dataset': 'mot17',

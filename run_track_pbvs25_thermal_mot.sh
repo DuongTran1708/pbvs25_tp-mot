@@ -8,11 +8,11 @@ export DIR_TSS=$DIR_CURRENT                         # .
 
 # Add python path
 export PYTHONPATH=$PYTHONPATH:$PWD                  # .
-
 export CUDA_LAUNCH_BLOCKING=1
 
 START_TIME="$(date -u +%s.%N)"
 ###########################################################################################################
+# shellcheck disable=SC2128
 
 echo "###########################"
 echo "STARTING"
@@ -42,21 +42,32 @@ echo "###########################"
 echo "****************"
 echo "TRACKING PROCESS"
 echo "****************"
-python main.py  \
-    --tracking  \
-    --run_image  \
-    --drawing  \
-    --config $DIR_TSS"/configs/pbvs25_thermal_mot.yaml"
+yaml_files=(pbvs25_thermal_mot.yaml)
+# shellcheck disable=SC2068
+for yaml_file in ${yaml_files[@]};
+do
+    python main.py  \
+        --tracking  \
+        --run_image  \
+        --config $DIR_TSS"/configs/"$yaml_file
+#        --drawing  \
+done
 
 
 # NOTE: TRACKING EVALUATION
 echo "******************"
 echo "TRACKING EVALUATION"
 echo "******************"
-python utilities/tracking_evaluation.py  \
-  --gt_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/  \
-  --mot_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/diffmot/  \
-  --ou_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/diffmot/  \
+track_folder_results=(bytetrack bytetrack_backward)
+# shellcheck disable=SC2068
+for track_folder_result in ${track_folder_results[@]};
+do
+    echo "Evaluation "$track_folder_result
+    python utilities/tracking_evaluation.py  \
+        --gt_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/  \
+        --mot_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/$track_folder_result/  \
+        --ou_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/$track_folder_result/
+done
 
 # ensemble MOT
 #python utilities/tracking_ensemble.py
@@ -64,8 +75,8 @@ python utilities/tracking_evaluation.py  \
 # evaluate ensemble MOT
 #python utilities/tracking_evaluation.py  \
 #  --gt_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/annotations/val/  \
-#  --mot_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/ensemble/sort_boosttrack/  \
-#  --ou_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/ensemble/sort_boosttrack/  \
+#  --mot_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/ensemble/sort_sort_backward_boosttrack_boosttrack_backward_bytetrack_bytetrack_backward/  \
+#  --ou_folder /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/tracking/ensemble/sort_sort_backward_boosttrack_boosttrack_backward_bytetrack_bytetrack_backward/  \
 
 
 echo "###########################"

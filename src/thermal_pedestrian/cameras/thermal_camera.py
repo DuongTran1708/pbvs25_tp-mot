@@ -29,6 +29,7 @@ import glob
 import copy
 import random
 import colorsys
+from functools import cmp_to_key
 from queue import Queue
 from operator import itemgetter
 from timeit import default_timer as timer
@@ -180,7 +181,7 @@ class ThermalCamera(BaseCamera):
 			detector (BaseDetector, dict):
 				Detector object or a detector's config dictionary.
 		"""
-		console.log(f"Initiate Detector.")
+		console.log(f"Initiate {self.detector_cfg['name']}.")
 		if isinstance(detector, BaseDetector):
 			self.detector = detector
 		elif isinstance(detector, dict):
@@ -196,7 +197,7 @@ class ThermalCamera(BaseCamera):
 			tracker (BaseTracker, dict):
 				Tracking object or a tracker's config dictionary.
 		"""
-		console.log(f"Initiate BaseTracker.")
+		console.log(f"Initiate {self.tracker_cfg['name']}.")
 		if isinstance(tracker, BaseTracker):
 			self.tracker = tracker
 		elif isinstance(tracker, dict):
@@ -281,7 +282,7 @@ class ThermalCamera(BaseCamera):
 				pbar.update(len(indexes))
 			pbar.close()
 
-	def run_tracker(self):
+	def run_tracker_forward(self):
 		"""Run tracking model"""
 		# input folder directory to load detection
 		folder_det_in = os.path.join(
@@ -323,12 +324,12 @@ class ThermalCamera(BaseCamera):
 			)
 			os.makedirs(folder_img_ou_ori_det, exist_ok=True)
 
-		# load list images
-		list_imgs = [s for s in sorted(os.listdir(self.data_loader_cfg['data_path']))]
+		# load list images FORWARDING
+		list_imgs = [s for s in sorted(os.listdir(self.data_loader_cfg['data_path']), key=cmp_to_key(compare_filenames), reverse=False)]
 
 		with (open(file_mot_ou, 'w') as f_write):
 			# run tracking
-			for img_index, img_name in enumerate(tqdm(list_imgs, desc=f"Tracking: {self.data_writer_cfg['seq_cur']}")):
+			for img_index, img_name in enumerate(tqdm(list_imgs, desc=f"Tracking forward: {self.data_writer_cfg['seq_cur']}")):
 				# init
 				img_path = os.path.join(self.data_loader_cfg['data_path'], img_name)
 				det_path = os.path.join(folder_det_in, f"{os.path.splitext(img_name)[0]}.txt")
@@ -419,7 +420,146 @@ class ThermalCamera(BaseCamera):
 					cv2.imwrite(os.path.join(folder_img_ou, os.path.basename(img_path)), image_draw)
 					cv2.imwrite(os.path.join(folder_img_ou_ori_det, os.path.basename(img_path)), image_draw_ori_det)
 
+	def run_tracker_backward(self):
+		"""Run tracking model"""
+		# input folder directory to load detection
+		folder_det_in = os.path.join(
+			self.data_writer_cfg['output_dir'],
+			"detection",
+			self.detector_cfg['folder_out'],
+			self.data_writer_cfg['seq_cur'],
+			"thermal/yolo"
+		)
 
+		# create file to store result
+		file_mot_ou = os.path.join(
+			self.data_writer_cfg['output_dir'],
+			"tracking",
+			f"{self.tracker_cfg['folder_out']}_backward",
+			self.data_writer_cfg['seq_cur'],
+			"thermal",
+			f"{self.data_writer_cfg['seq_cur']}_thermal.txt"
+		)
+		os.makedirs(os.path.dirname(file_mot_ou), exist_ok=True)
+
+		# DEBUG: draw
+		if self.drawing:
+			folder_img_ou = os.path.join(
+				self.data_writer_cfg['output_dir'],
+				"tracking",
+				f"{self.tracker_cfg['folder_out']}_backward",
+				self.data_writer_cfg['seq_cur'],
+				"thermal/img_draw"
+			)
+			os.makedirs(folder_img_ou, exist_ok=True)
+
+			folder_img_ou_ori_det = os.path.join(
+				self.data_writer_cfg['output_dir'],
+				"tracking",
+				f"{self.tracker_cfg['folder_out']}_backward",
+				self.data_writer_cfg['seq_cur'],
+				"thermal/img_draw_ori"
+			)
+			os.makedirs(folder_img_ou_ori_det, exist_ok=True)
+
+		# load list images BACKWARDING
+		list_imgs = [s for s in sorted(os.listdir(self.data_loader_cfg['data_path']), key=cmp_to_key(compare_filenames), reverse=True)]
+
+		with (open(file_mot_ou, 'w') as f_write):
+			# run tracking
+			for img_index, img_name in enumerate(tqdm(list_imgs, desc=f"Tracking backward: {self.data_writer_cfg['seq_cur']}")):
+				# init
+				img_path = os.path.join(self.data_loader_cfg['data_path'], img_name)
+				det_path = os.path.join(folder_det_in, f"{os.path.splitext(img_name)[0]}.txt")
+
+				# load image
+				img = cv2.imread(img_path)
+
+				# DEBUG: draw
+				if self.drawing:
+					image_draw         = img.copy()
+					image_draw_ori_det = img.copy()
+
+				# load yolo detection
+				# class_id, c_xn, c_yn, wn, hw, score
+				# dets = np.loadtxt(det_path, dtype=np.float32, delimiter=' ').reshape(-1, 6)  # for detection has score
+
+				instances = []
+				with open(det_path, "r") as f_read:
+					for line in f_read:
+						line   = line.strip().split(" ")
+						det    = [float(x) for x in line]
+						det[0] = int(det[0])
+						if len(det) == 5:  # class_id, c_xn, c_yn, wn, hw, and does not have score
+							det.append(float(random.randint(60, 90) / 100))   # random generate
+
+						if det[5] < self.tracker_cfg['min_confidence_det']:
+							continue
+
+						instance = Instance(
+									video_name   = self.data_writer_cfg['seq_cur'],
+									frame_index  = img_index,
+									bbox         = np.asarray(covert_bbox_yolo_to_voc_format(det[1: 5], img)),
+									confidence   = det[5],
+									class_label  = self.class_labels.class_labels[det[0]]
+						)
+
+						# filter detection
+						# if width and height equal 0
+						# if (abs(int(instance.bbox[0] - instance.bbox[2])) < 2 or
+						# 		abs(int(instance.bbox[1] - instance.bbox[3])) < 2):
+						# 	continue
+
+						instances.append(instance)
+
+						# DEBUG: draw
+						if self.drawing:
+							image_draw_ori_det = plot_one_box_voc(
+								bbox  = instance.bbox,
+								img   = image_draw_ori_det,
+								color = create_unique_color_uchar(instance.id % 1000),
+								label = f"{instance.id % 1000}_{instance.confidence:.2f}"
+							)
+
+				# tracking process
+				self.tracker.update(detections=instances, image=img)
+				gmos = self.tracker.tracks
+
+				# write result
+				# '{frame},{id},{x1},{y1},{w},{h},{s},{label},-1,-1\n'
+				for gmo in gmos:
+					if gmo.time_since_update > 0:  # the track does not have any dets match
+						continue
+					bbox = bbox_xyxy_to_xywh(gmo.current_bbox)
+
+					str_out = (f"{img_index + 1},"  # because frame start from 1, PBVS rule
+								f"{gmo.id},"  
+								f"{abs(bbox[0])},"
+								f"{abs(bbox[1])},"
+								f"{abs(bbox[2])},"
+								f"{abs(bbox[3])},"
+								f"{gmo.confidence:.3f},"
+								f"{gmo.current_label['id']},"
+								f"-1,-1\n")
+
+					f_write.write(str_out)
+
+					# DEBUG: draw
+					if self.drawing:
+						image_draw = plot_one_box_voc(
+							bbox  = gmo.current_bbox,
+							img   = image_draw,
+							color = create_unique_color_uchar(gmo.id % 1000),
+							label = f"{gmo.id % 1000}_{gmo.confidence:.2f}"
+						)
+
+				# DEBUG: draw
+				if self.drawing:
+					cv2.imwrite(os.path.join(folder_img_ou, os.path.basename(img_path)), image_draw)
+					cv2.imwrite(os.path.join(folder_img_ou_ori_det, os.path.basename(img_path)), image_draw_ori_det)
+
+		# reverse mot result
+		reverse_mot_result(file_mot_ou)
 
 	def run_heuristic(self):
 		"""Run heuristic model"""
@@ -460,7 +600,12 @@ class ThermalCamera(BaseCamera):
 					self.tracker.clear_model_memory()
 					self.tracker = None
 					self.init_tracker(tracker=self.tracker_cfg)
-				self.run_tracker()
+				self.run_tracker_forward()
+				if self.tracker_cfg['is_reload_model']:
+					self.tracker.clear_model_memory()
+					self.tracker = None
+					self.init_tracker(tracker=self.tracker_cfg)
+				self.run_tracker_backward()
 
 		self.run_routine_end()
 
@@ -584,3 +729,48 @@ def create_unique_color_float(tag, hue_step=0.41):
 def create_unique_color_uchar(tag, hue_step=0.41):
 	r, g, b = create_unique_color_float(tag, hue_step)
 	return (int(255 * r), int(255 * g), int(255 * b))
+
+
+def compare_filenames(x, y):
+	"""Compare filenames
+		-1 means x < y, 0 means x == y, 1 means x > y
+	"""
+	if int(os.path.splitext(os.path.basename(x))[0]) < int(os.path.splitext(os.path.basename(y))[0]):
+		return -1
+	elif int(os.path.splitext(os.path.basename(x))[0]) > int(os.path.splitext(os.path.basename(y))[0]):
+		return 1
+	else:
+		return 0
+
+
+def reverse_mot_result(file_path):
+	"""Reverse the mot result file"""
+	with open(file_path, "r") as f_read:
+		lines = f_read.readlines()
+
+	if len(lines) == 0:
+		return
+
+	results = []
+	for line in lines:
+		results.append(np.array(line.strip().split(",")))
+	results = np.array(results, dtype=np.float32)
+
+	# Max Track_ID
+	index_frame_max = np.max(results[:, 0])
+	track_id_max    = np.max(results[:, 1])
+
+	with open(file_path, "w") as f_write:
+		for result in reversed(results):
+			result[0] = index_frame_max - result[0] + 1
+			result[1] = track_id_max - result[1] + 1
+			str_out = (f"{int(result[0])},"  # because frame start from 1, PBVS rule
+						f"{int(result[1])},"
+						f"{float(result[2])},"
+						f"{float(result[3])},"
+						f"{float(result[4])},"
+						f"{float(result[5])},"
+						f"{float(result[6]):.3f},"
+						f"{int(result[7])},"
+						f"-1,-1\n")
+			f_write.write(str_out)

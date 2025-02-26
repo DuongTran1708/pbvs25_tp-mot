@@ -72,7 +72,7 @@ tracker:
   min_hit: 3
     # The number of frame which has matching bounding box of the detected object
   # before the object is considered becoming the track.
-  iou_threshold: 0.15
+  iou_threshold: 0.01
   # The Intersection over Union between two track with their bounding box.
   min_confidence_det: 0.2
   # Detection confidence threshold. Disregard all detections that have a
