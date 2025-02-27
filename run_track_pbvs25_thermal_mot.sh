@@ -39,20 +39,20 @@ echo "###########################"
 #  --ou_file /media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25/detection/yolov8s_1600_imgz_1600/object_detection_result.txt  \
 
 # NOTE: TRACKING PROCESS
-echo "****************"
-echo "TRACKING PROCESS"
-echo "****************"
-#yaml_files=(pbvs25_thermal_mot_sort.yaml pbvs25_thermal_mot_boosttrack.yaml pbvs25_thermal_mot_diffmot.yaml pbvs25_thermal_mot_bytetrack.yaml pbvs25_thermal_mot_botsort.yaml)
-yaml_files=(pbvs25_thermal_mot_bytetrack.yaml)
-# shellcheck disable=SC2068
-for yaml_file in ${yaml_files[@]};
-do
-    python main.py  \
-        --tracking  \
-        --run_image  \
-        --config $DIR_TSS"/configs/"$yaml_file
-        #        --drawing  \
-done
+#echo "****************"
+#echo "TRACKING PROCESS"
+#echo "****************"
+##yaml_files=(pbvs25_thermal_mot_sort.yaml pbvs25_thermal_mot_boosttrack.yaml pbvs25_thermal_mot_diffmot.yaml pbvs25_thermal_mot_bytetrack.yaml pbvs25_thermal_mot_botsort.yaml)
+#yaml_files=(pbvs25_thermal_mot_boosttrack.yaml)
+## shellcheck disable=SC2068
+#for yaml_file in ${yaml_files[@]};
+#do
+#    python main.py  \
+#        --tracking  \
+#        --run_image  \
+#        --config $DIR_TSS"/configs/"$yaml_file
+##        --drawing  \
+#done
 
 
 # NOTE: TRACKING EVALUATION
@@ -60,7 +60,7 @@ echo "******************"
 echo "TRACKING EVALUATION"
 echo "******************"
 #track_folder_results=(sort sort_backward boosttrack boosttrack_backward diffmot diffmot_backward bytetrack bytetrack_backward botsort botsort_backward)
-track_folder_results=(bytetrack bytetrack_backward)
+track_folder_results=(sort sort_backward)
 # shellcheck disable=SC2068
 for track_folder_result in ${track_folder_results[@]};
 do

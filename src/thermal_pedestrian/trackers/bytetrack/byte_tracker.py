@@ -291,11 +291,11 @@ class BYTETracker:
 
     def update(self, results, img=None):
         """Updates the tracker with new detections and returns the current list of tracked objects."""
-        self.frame_id += 1
-        activated_stracks = []
-        refind_stracks = []
-        lost_stracks = []
-        removed_stracks = []
+        self.frame_id     += 1
+        activated_stracks  = []
+        refind_stracks     = []
+        lost_stracks       = []
+        removed_stracks    = []
 
         scores = results.conf
         bboxes = results.xywhr if hasattr(results, "xywhr") else results.xywh
@@ -304,26 +304,27 @@ class BYTETracker:
         cls = results.cls
 
         remain_inds = scores >= self.args.track_high_thresh
-        inds_low = scores > self.args.track_low_thresh
-        inds_high = scores < self.args.track_high_thresh
+        inds_low    = scores > self.args.track_low_thresh
+        inds_high   = scores < self.args.track_high_thresh
 
-        inds_second = inds_low & inds_high
-        dets_second = bboxes[inds_second]
-        dets = bboxes[remain_inds]
-        scores_keep = scores[remain_inds]
+        inds_second   = inds_low & inds_high
+        dets_second   = bboxes[inds_second]
+        dets          = bboxes[remain_inds]
+        scores_keep   = scores[remain_inds]
         scores_second = scores[inds_second]
-        cls_keep = cls[remain_inds]
-        cls_second = cls[inds_second]
+        cls_keep      = cls[remain_inds]
+        cls_second    = cls[inds_second]
 
         detections = self.init_track(dets, scores_keep, cls_keep, img)
         # Add newly detected tracklets to tracked_stracks
-        unconfirmed = []
+        unconfirmed     = []
         tracked_stracks = []  # type: list[STrack]
         for track in self.tracked_stracks:
             if not track.is_activated:
                 unconfirmed.append(track)
             else:
                 tracked_stracks.append(track)
+
         # Step 2: First association, with high score detection boxes
         strack_pool = self.joint_stracks(tracked_stracks, self.lost_stracks)
         # Predict the current location with KF
@@ -345,6 +346,7 @@ class BYTETracker:
             else:
                 track.re_activate(det, self.frame_id, new_id=False)
                 refind_stracks.append(track)
+
         # Step 3: Second association, with low score detection boxes association the untrack to the low score detections
         detections_second = self.init_track(dets_second, scores_second, cls_second, img)
         r_tracked_stracks = [strack_pool[i] for i in u_track if strack_pool[i].state == TrackState.Tracked]
@@ -377,6 +379,7 @@ class BYTETracker:
             track = unconfirmed[it]
             track.mark_removed()
             removed_stracks.append(track)
+
         # Step 4: Init new stracks
         for inew in u_detection:
             track = detections[inew]
@@ -384,6 +387,7 @@ class BYTETracker:
                 continue
             track.activate(self.kalman_filter, self.frame_id)
             activated_stracks.append(track)
+
         # Step 5: Update state
         for track in self.lost_stracks:
             if self.frame_id - track.end_frame > self.max_time_lost:
@@ -393,9 +397,9 @@ class BYTETracker:
         self.tracked_stracks = [t for t in self.tracked_stracks if t.state == TrackState.Tracked]
         self.tracked_stracks = self.joint_stracks(self.tracked_stracks, activated_stracks)
         self.tracked_stracks = self.joint_stracks(self.tracked_stracks, refind_stracks)
-        self.lost_stracks = self.sub_stracks(self.lost_stracks, self.tracked_stracks)
+        self.lost_stracks    = self.sub_stracks(self.lost_stracks, self.tracked_stracks)
         self.lost_stracks.extend(lost_stracks)
-        self.lost_stracks = self.sub_stracks(self.lost_stracks, self.removed_stracks)
+        self.lost_stracks    = self.sub_stracks(self.lost_stracks, self.removed_stracks)
         self.tracked_stracks, self.lost_stracks = self.remove_duplicate_stracks(self.tracked_stracks, self.lost_stracks)
         self.removed_stracks.extend(removed_stracks)
         if len(self.removed_stracks) > 1000:

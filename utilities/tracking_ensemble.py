@@ -155,8 +155,8 @@ def main():
 		'sort_backward',
 		'boosttrack',
 		'boosttrack_backward',
-		'botsort',
-		'botsort_backward',
+		'bytetrack',
+		'bytetrack_backward',
 	]
 
 	# create folder out

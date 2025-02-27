@@ -69,7 +69,7 @@ tracker:
   # Name of the tracker.
   max_age: 10
   # Max number of frame keep the object before deleting.
-  min_hit: 3
+  min_hit: 1
     # The number of frame which has matching bounding box of the detected object
   # before the object is considered becoming the track.
   iou_threshold: 0.2
