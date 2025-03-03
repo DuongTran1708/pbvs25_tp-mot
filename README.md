@@ -56,9 +56,8 @@ The folder structure should be as following:
 pbvs25_tp-mot
 ├── models_zoo
 │   ├──pbvs25_tmot
-│   │   ├──pbvs25_tmot
-│   │   │   ├── models_zoo
-│   │   │   │   └──weight
+│   │   ├──pbvs25_tmot_1600
+│   │   │   └──weight
 ```
 
 ##### b. Run inference
