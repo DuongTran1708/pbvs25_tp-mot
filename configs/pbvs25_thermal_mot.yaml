@@ -53,7 +53,7 @@ detector:
   min_confidence: 0.0001
   # Detection confidence threshold. Disregard all detections that have a
   # confidence lower than this value.
-  nms_max_overlap: 0.5
+  nms_max_overlap: 0.7
   # Maximum detection overlap (non-maxima suppression threshold).
   device: &device "0"
   # CUDDevice, i.e. 0 or 0,1,2,3 or cpu
@@ -67,7 +67,7 @@ detector:
 tracker:
   name: "sort"
   # Name of the tracker.
-  max_age: 10
+  max_age: 30
   # Max number of frame keep the object before deleting.
   min_hit: 3
     # The number of frame which has matching bounding box of the detected object
@@ -78,7 +78,7 @@ tracker:
   # The output folder
   weights: "models_zoo/pbvs25_tmot/pbvs25_tmot_1280/weights/best.pt"
   # Pretrained weights file.
-  min_confidence_det: 0.001
+  min_confidence_det: 0.6
   # Detection confidence threshold. Disregard all detections that have a
   # confidence lower than this value.
   is_reload_model: False
