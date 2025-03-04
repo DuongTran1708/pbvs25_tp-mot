@@ -30,7 +30,7 @@ data_loader:
   # Number of samples in one forward & backward pass.
   queue_size: *batch_size
   # Number of slot in the queue to store the frame
-  data_dir_prefix: "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/images/val/"
+  data_dir_prefix: "data/tmot_dataset/images/val/"
   # Prefix of the dataset
   data_dir_seq: ["seq2", "seq17", "seq22", "seq47", "seq54", "seq66"]
   # Sequence of the dataset
@@ -65,7 +65,7 @@ detector:
   # Number of slot in the queue to store the detection result
 
 tracker:
-  name: "botsort"
+  name: "sort"
   # Name of the tracker.
   max_age: 10
   # Max number of frame keep the object before deleting.
@@ -74,7 +74,7 @@ tracker:
   # before the object is considered becoming the track.
   iou_threshold: &iou_threshold_track 0.01
   # The Intersection over Union between two track with their bounding box.
-  folder_out: "botsort"
+  folder_out: "sort"
   # The output folder
   weights: "models_zoo/pbvs25_tmot/pbvs25_tmot_1280/weights/best.pt"
   # Pretrained weights file.
@@ -82,26 +82,10 @@ tracker:
   # Detection confidence threshold. Disregard all detections that have a
   # confidence lower than this value.
   is_reload_model: False
-  # Does the tracking model need to be reset after running 1 sequence
-  bytetrack_config:
-    track_high_thresh: 0.25 # threshold for the first association
-    track_low_thresh: 0.1 # threshold for the second association
-    new_track_thresh: 0.25 # threshold for init new track if the detection does not match any tracks
-    track_buffer: 30 # buffer to calculate the time when to remove tracks
-    match_thresh: 0.8 # threshold for matching tracks
-    fuse_score: True # Whether to fuse confidence scores with the iou distances before matching
-    # min_box_area: 10  # threshold for min box areas(for tracker evaluation, not used for now)
-    iou: *iou_threshold_track # threshold for iou between two boxes
-    # BoT-SORT settings
-    gmc_method: sparseOptFlow # method of global motion compensation
-    # ReID model related thresh (not supported yet)
-    proximity_thresh: 0.5
-    appearance_thresh: 0.25
-    with_reid: False
 
 
 data_writer:
-  output_dir: "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25"
+  output_dir: "data/tmot_dataset/output_pbvs25"
   # Output video file or a directory.
   shape: *shape
   # Output size [H, W, C].

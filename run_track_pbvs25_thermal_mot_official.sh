@@ -32,7 +32,7 @@ python main.py  \
 echo "****************"
 echo "TRACKING PROCESS"
 echo "****************"
-yaml_files=(pbvs25_thermal_mot_sort.yaml)
+yaml_files=(pbvs25_thermal_mot.yaml)
 # shellcheck disable=SC2068
 for yaml_file in ${yaml_files[@]};
 do
