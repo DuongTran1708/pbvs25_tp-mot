@@ -47,17 +47,16 @@ pbvs25_tp-mot
 
 #### III. Reference
 
-##### a. Download weight
-
-Download weight from [Release](https://o365skku-my.sharepoint.com/:f:/g/personal/duongtran_o365_skku_edu/Eo2nfe_g62VNocpi_6mOIjsBFPbXaDiVat1C7vaJ6HLJ_g?e=e5tjcB) then put it into **pbvs25_tp-mot/models_zoo/pbvs25_tmot**.
+##### a. Check weight
 
 The folder structure should be as following:
 ```
 pbvs25_tp-mot
 ├── models_zoo
 │   ├──pbvs25_tmot
-│   │   ├──pbvs25_tmot_1600
-│   │   │   └──weight
+│   │   ├──pbvs25_tmot_v1_16002
+│   │   │   ├──weight
+│   │   │   │   └──best.pt
 ```
 
 ##### b. Run inference
@@ -65,7 +64,7 @@ pbvs25_tp-mot
 And the running script to get the result
 
 ```shell
-bash script/run_track_pbvs25_thermal_mot.sh 
+bash script/run_track_pbvs25_thermal_mot_official.sh 
 ```
 
 ##### c. Get the result

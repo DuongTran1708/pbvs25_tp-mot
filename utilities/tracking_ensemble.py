@@ -153,10 +153,9 @@ def main():
 	methods = [
 		'sort',
 		'sort_backward',
-		'boosttrack',
-		'boosttrack_backward',
-		'bytetrack',
-		'bytetrack_backward',
+		# 'boosttrack_backward',
+		# 'bytetrack',
+		# 'bytetrack_backward',
 	]
 
 	# create folder out
@@ -186,6 +185,7 @@ def main():
 
 		# ensemble process
 		preds = ensemble(preds, iou_s=0.5, iou_t=0.5, merge_mode=merge_mode)
+		# preds = ensemble(preds, iou_s=0.8, iou_t=0.8, merge_mode=merge_mode)
 		preds = nms(preds, thres=.7)
 		preds = filter_by_length(preds, thres=20)
 

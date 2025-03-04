@@ -25,8 +25,8 @@ echo "###########################"
 #python main.py  \
 #    --detection  \
 #    --run_image  \
-#    --drawing  \
 #    --config $DIR_TSS"/configs/pbvs25_thermal_mot_sort.yaml"
+#    --drawing  \
 
 # NOTE: DETECTION EVALUATION
 #echo "********************"
@@ -42,14 +42,15 @@ echo "###########################"
 #echo "****************"
 #echo "TRACKING PROCESS"
 #echo "****************"
-##yaml_files=(pbvs25_thermal_mot_sort.yaml pbvs25_thermal_mot_boosttrack.yaml pbvs25_thermal_mot_diffmot.yaml pbvs25_thermal_mot_bytetrack.yaml pbvs25_thermal_mot_botsort.yaml)
-#yaml_files=(pbvs25_thermal_mot_boosttrack.yaml)
+#yaml_files=(pbvs25_thermal_mot_sort.yaml pbvs25_thermal_mot_boosttrack.yaml pbvs25_thermal_mot_diffmot.yaml pbvs25_thermal_mot_bytetrack.yaml pbvs25_thermal_mot_botsort.yaml)
+##yaml_files=(pbvs25_thermal_mot_sort.yaml)
 ## shellcheck disable=SC2068
 #for yaml_file in ${yaml_files[@]};
 #do
 #    python main.py  \
 #        --tracking  \
 #        --run_image  \
+#        --drawing  \
 #        --config $DIR_TSS"/configs/"$yaml_file
 ##        --drawing  \
 #done
@@ -59,8 +60,8 @@ echo "###########################"
 echo "******************"
 echo "TRACKING EVALUATION"
 echo "******************"
-#track_folder_results=(sort sort_backward boosttrack boosttrack_backward diffmot diffmot_backward bytetrack bytetrack_backward botsort botsort_backward)
-track_folder_results=(sort sort_backward)
+track_folder_results=(sort sort_backward boosttrack boosttrack_backward diffmot diffmot_backward bytetrack bytetrack_backward botsort botsort_backward)
+#track_folder_results=(sort sort_backward)
 # shellcheck disable=SC2068
 for track_folder_result in ${track_folder_results[@]};
 do

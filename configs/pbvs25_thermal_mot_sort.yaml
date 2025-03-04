@@ -46,14 +46,15 @@ detector:
     # YOLOv5 variances.
     nc: 80
     # Number of classes.
-  weights: "models_zoo/pbvs25_tmot/pbvs25_tmot_v1_16002/weights/best.pt"
+  weights:
+    - "models_zoo/pbvs25_tmot/pbvs25_tmot_v1_16002/weights/best.pt"
   # Pretrained weights file.
   shape: [1600, 1600, 3]
   # Input size as [C, H, W].
   min_confidence: 0.0001
   # Detection confidence threshold. Disregard all detections that have a
   # confidence lower than this value.
-  nms_max_overlap: 0.5
+  nms_max_overlap: 0.7
   # Maximum detection overlap (non-maxima suppression threshold).
   device: &device "0"
   # CUDDevice, i.e. 0 or 0,1,2,3 or cpu
@@ -74,7 +75,7 @@ tracker:
   # before the object is considered becoming the track.
   iou_threshold: 0.01
   # The Intersection over Union between two track with their bounding box.
-  min_confidence_det: 0.2
+  min_confidence_det: 0.6
   # Detection confidence threshold. Disregard all detections that have a
   # confidence lower than this value.
   folder_out: "sort"
