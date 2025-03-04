@@ -49,6 +49,8 @@ pbvs25_tp-mot
 
 ##### a. Check weight
 
+Download weight from release of github [release](https://github.com/DuongTran1708/pbvs25_tp-mot/releases/download/v0.1/best.pt)
+
 The folder structure should be as following:
 ```
 pbvs25_tp-mot
