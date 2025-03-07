@@ -2,7 +2,7 @@
 
 ## Automation Lab, Sungkyunkwan University
 
-### Paper Workshop: "A Novel Tuning Method for Real-time Multiple-Object Tracking Utilizing Thermal Sensor with Complexity Motion Pattern"
+### Paper for workshop submission: "A Novel Tuning Method for Real-time Multiple-Object Tracking Utilizing Thermal Sensor with Complexity Motion Pattern"
 
 ---
 
