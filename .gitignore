@@ -180,5 +180,5 @@ cython_debug/
 *.parquet
 
 # temp file from pc
-*.sugarubuntu
 /models_zoo/
+/utilities/
