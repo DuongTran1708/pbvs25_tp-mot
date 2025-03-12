@@ -51,14 +51,14 @@ pbvs25_tp-mot
 
 ##### a. Check weight
 
-Download weight from release of github [release](https://github.com/DuongTran1708/pbvs25_tp-mot/releases/download/v0.1/best.pt)
+Download weight from release of github [release](https://github.com/DuongTran1708/pbvs25_tp-mot/releases/tag/v0.1)
 
 The folder structure should be as following:
 ```
 pbvs25_tp-mot
 ├── models_zoo
 │   ├──pbvs25_tmot
-│   │   ├──pbvs25_tmot_v1_16002
+│   │   ├──pbvs25_tmot_v1_1920
 │   │   │   ├──weight
 │   │   │   │   └──best.pt
 ```

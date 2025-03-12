@@ -1,5 +1,5 @@
 ---
-dataset: &dataset "pbvs25_trafficsafety"
+dataset: &dataset "pbvs25_thermal"
 # Dataset name. It is also the name of the directory inside `data_dir`.
 name: &camera_name "pbvs25"
 # Camera name is also used as the unique ID (NO FILE EXTENSION).
@@ -46,20 +46,21 @@ detector:
     # YOLOv5 variances.
     nc: 80
     # Number of classes.
-  weights: "models_zoo/pbvs25_tmot/pbvs25_tmot_v1_16002/weights/best.pt"
+  weights:
+    - "models_zoo/pbvs25_tmot/pbvs25_tmot_v1_1920/weights/best.pt"
   # Pretrained weights file.
-  shape: [1600, 1600, 3]
+  shape: [1920, 1920, 3]
   # Input size as [C, H, W].
   min_confidence: 0.0001
   # Detection confidence threshold. Disregard all detections that have a
   # confidence lower than this value.
-  nms_max_overlap: 0.7
+  nms_max_overlap: 0.75
   # Maximum detection overlap (non-maxima suppression threshold).
   device: &device "0"
   # CUDDevice, i.e. 0 or 0,1,2,3 or cpu
   batch_size: *batch_size
   # Number of samples in one forward & backward pass.
-  folder_out: "yolov8s_1600_imgz_1600"
+  folder_out: "yolov8s_1920_imgz_1920"
   # The output folder
   queue_size: 30
   # Number of slot in the queue to store the detection result
@@ -67,22 +68,20 @@ detector:
 tracker:
   name: "sort"
   # Name of the tracker.
-  max_age: 30
+  max_age: 40
   # Max number of frame keep the object before deleting.
   min_hit: 3
     # The number of frame which has matching bounding box of the detected object
   # before the object is considered becoming the track.
-  iou_threshold: &iou_threshold_track 0.01
+  iou_threshold: 0.001
   # The Intersection over Union between two track with their bounding box.
-  folder_out: "sort"
-  # The output folder
-  weights: "models_zoo/pbvs25_tmot/pbvs25_tmot_1280/weights/best.pt"
-  # Pretrained weights file.
-  min_confidence_det: 0.6
+  min_confidence_det: 0.5
   # Detection confidence threshold. Disregard all detections that have a
   # confidence lower than this value.
+  folder_out: "sort"
+  # The output folder
   is_reload_model: False
-
+  # Does the tracking model need to be reset after running 1 sequence
 
 data_writer:
   output_dir: "data/tmot_dataset/output_pbvs25"
