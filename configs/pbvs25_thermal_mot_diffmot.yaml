@@ -1,5 +1,5 @@
 ---
-dataset: &dataset "pbvs25_trafficsafety"
+dataset: &dataset "pbvs25_thermal"
 # Dataset name. It is also the name of the directory inside `data_dir`.
 name: &camera_name "pbvs25"
 # Camera name is also used as the unique ID (NO FILE EXTENSION).
@@ -30,7 +30,7 @@ data_loader:
   # Number of samples in one forward & backward pass.
   queue_size: *batch_size
   # Number of slot in the queue to store the frame
-  data_dir_prefix: "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/images/val/"
+  data_dir_prefix: "tmot_dataset/images/val/"
   # Prefix of the dataset
 #  data_dir_seq: ["seq2", "seq17", "seq22", "seq47", "seq54", "seq66"]
   data_dir_seq: ["seq2"]
@@ -47,7 +47,7 @@ detector:
     # YOLOv5 variances.
     nc: 80
     # Number of classes.
-  weights: "models_zoo/pbvs25_tmot/pbvs25_tmot_v1_16002/weights/best.pt"
+  weights: "models_zoo/pbvs25_tmot/pbvs25_tmot_v1_1920/weights/best.pt"
   # Pretrained weights file.
   shape: [1600, 1600, 3]
   # Input size as [C, H, W].
