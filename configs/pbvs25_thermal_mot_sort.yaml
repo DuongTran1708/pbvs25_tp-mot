@@ -30,7 +30,7 @@ data_loader:
   # Number of samples in one forward & backward pass.
   queue_size: *batch_size
   # Number of slot in the queue to store the frame
-  data_dir_prefix: "tmot_dataset/images/val/"
+  data_dir_prefix: "data/tmot_dataset/images/val/"
   # Prefix of the dataset
   data_dir_seq: ["seq2", "seq17", "seq22", "seq47", "seq54", "seq66"]
   # Sequence of the dataset
@@ -84,7 +84,7 @@ tracker:
   # Does the tracking model need to be reset after running 1 sequence
 
 data_writer:
-  output_dir: "/media/sugarubuntu/DataSKKU3/3_Dataset/PBVS_challenge/tmot_dataset_after_checked/output_pbvs25"
+  output_dir: "data/tmot_dataset/output_pbvs25"
   # Output video file or a directory.
   shape: *shape
   # Output size [H, W, C].
