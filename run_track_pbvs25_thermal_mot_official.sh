@@ -26,7 +26,7 @@ python main.py  \
     --detection  \
     --run_image  \
     --drawing  \
-    --config $DIR_TSS"/configs/pbvs25_thermal_mot_sort.yaml"
+    --config $DIR_TSS"/configs/pbvs25_thermal_mot.yaml"
 
 # NOTE: TRACKING PROCESS
 echo "****************"
