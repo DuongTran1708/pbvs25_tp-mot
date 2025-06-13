@@ -4,7 +4,9 @@
 
 ## Team: AutoSKKU
 
-### Paper for workshop submission: "A Novel Tuning Method for Real-time Multiple-Object Tracking Utilizing Thermal Sensor with Complexity Motion Pattern"
+### Winner of PBVS 2025 - Thermal Pedestrian Multiple Object Tracking Challenge (TP-MOT)
+
+![pbvs_2025_tmot.jpg](assets/pbvs_2025_tmot.jpg)
 
 ---
 
