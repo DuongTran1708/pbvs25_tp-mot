@@ -67,6 +67,8 @@ pbvs25_tp-mot
 │   │   │   │   └──best.pt
 ```
 
+Or you can download more weights from the link [release](https://github.com/DuongTran1708/pbvs25_tp-mot/releases/tag/v1.0)
+
 ##### b. Run inference
 
 And the running script to get the result
@@ -83,3 +85,28 @@ pbvs25_tp-mot
 │   ├──tmot_dataset
 │   │   ├──output_pbvs25
 ```
+
+#### IV. Citation
+
+```
+@misc{tran2025noveltuningmethodrealtime,
+      title={A Novel Tuning Method for Real-time Multiple-Object Tracking Utilizing Thermal Sensor with Complexity Motion Pattern}, 
+      author={Duong Nguyen-Ngoc Tran and Long Hoang Pham and Chi Dai Tran and Quoc Pham-Nam Ho and Huy-Hung Nguyen and Jae Wook Jeon},
+      year={2025},
+      eprint={2507.02408},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2507.02408}, 
+}
+```
+
+#### V. Acknowledgement
+
+Most of the code is adapted from [Mon](https://github.com/phlong3105/mon). 
+
+This repository also features code from 
+[Ultralytics](https://github.com/ultralytics/ultralytics),  
+[Torchreid](https://github.com/KaiyangZhou/deep-person-reid), 
+[DiffMOT](https://github.com/Kroery/DiffMOT), 
+[BoostTrack](https://github.com/vukasin-stanojevic/BoostTrack),
+and [TrackEval](https://github.com/JonathonLuiten/TrackEval).  
