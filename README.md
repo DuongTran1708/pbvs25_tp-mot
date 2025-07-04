@@ -67,7 +67,7 @@ pbvs25_tp-mot
 │   │   │   │   └──best.pt
 ```
 
-Or you can download more weights from the link [release](https://github.com/DuongTran1708/pbvs25_tp-mot/releases/tag/v1.0)
+More training resource from the link [release](https://github.com/DuongTran1708/pbvs25_tp-mot/releases/tag/v1.0)
 
 ##### b. Run inference
 
