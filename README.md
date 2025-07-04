@@ -105,8 +105,8 @@ pbvs25_tp-mot
 Most of the code is adapted from [Mon](https://github.com/phlong3105/mon). 
 
 This repository also features code from 
-[Ultralytics](https://github.com/ultralytics/ultralytics),  
-[Torchreid](https://github.com/KaiyangZhou/deep-person-reid), 
+[Ultralytics](https://github.com/ultralytics/ultralytics),
+[Torchreid](https://github.com/KaiyangZhou/deep-person-reid),
 [DiffMOT](https://github.com/Kroery/DiffMOT), 
 [BoostTrack](https://github.com/vukasin-stanojevic/BoostTrack),
 and [TrackEval](https://github.com/JonathonLuiten/TrackEval).  
