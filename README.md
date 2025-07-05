@@ -6,9 +6,11 @@
 
 ### Winner of PBVS 2025 - Thermal Pedestrian Multiple Object Tracking Challenge (TP-MOT)
 
-<div align="center"></div>
+<div align="center">
 <a href="https://arxiv.org/abs/2507.02408"> <img alt="Static Badge" src="https://img.shields.io/badge/arXiv-2507.02408-%23CE0000?logo=arXiv&logoColor=rgb&labelColor=gray"></a>
 </div>
+
+
 
 ![pbvs_2025_tmot.jpg](assets/pbvs_2025_tmot.jpg)
 
